@@ -11,24 +11,32 @@
         android:id="@+id/lblHouseName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="House Name" />
+        android:text="House Name"
+        tools:layout_editor_absoluteX="119dp"
+        tools:layout_editor_absoluteY="206dp" />
 
     <TextView
         android:id="@+id/lblAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Address" />
+        android:text="Address"
+        tools:layout_editor_absoluteX="130dp"
+        tools:layout_editor_absoluteY="113dp" />
 
     <TextView
         android:id="@+id/lblCustomerName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Customer Name" />
+        android:text="Customer Name"
+        tools:layout_editor_absoluteX="255dp"
+        tools:layout_editor_absoluteY="195dp" />
 
     <Button
         android:id="@+id/btnAddRoom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Room" />
+        android:text="Add Room"
+        tools:layout_editor_absoluteX="140dp"
+        tools:layout_editor_absoluteY="419dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
