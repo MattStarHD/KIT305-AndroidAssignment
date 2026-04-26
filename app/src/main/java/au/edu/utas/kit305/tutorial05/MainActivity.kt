@@ -10,10 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import au.edu.utas.kit305.tutorial05.databinding.ActivityMainBinding
 import au.edu.utas.kit305.tutorial05.databinding.MyListItemBinding
 
-val items = mutableListOf(
-    Movie("Test Movie 1"),
-    Movie("Test Movie 2")
-)
+val items = mutableListOf<House>()
 
 class MainActivity : AppCompatActivity()
 {
@@ -26,24 +23,49 @@ class MainActivity : AppCompatActivity()
         setContentView(ui.root)
 
         val db = FirebaseFirestore.getInstance()
-
+/*
         val movie = hashMapOf(
             "title" to "Test Movie Firebase"
         )
 
         db.collection("movies")
             .add(movie)
-
-        ui.lblMovieCount.text = "${items.size} Movies"
-        ui.myList.adapter = MovieAdapter(movies = items)
+*/
+        ui.lblMovieCount.text = "${items.size} Houses"
+        ui.myList.adapter = HouseAdapter(houses = items)
 
         //vertical list
         ui.myList.layoutManager = LinearLayoutManager(this)
+        // 👇 PASTE THE BLOCK HERE (INSIDE onCreate)
+
+        db.collection("houses")
+            .get()
+            .addOnSuccessListener { result ->
+                items.clear()
+
+                for (document in result) { //------------------ai--------------------
+                    val houseName = document.getString("houseName") ?: ""
+                    val address = document.getString("address") ?: ""
+                    val customerName = document.getString("customerName") ?: ""
+
+                    items.add(
+                        House(
+                            id = document.id,
+                            houseName = houseName,
+                            address = address,
+                            customerName = customerName
+                        )
+                    )
+                }
+
+                ui.lblMovieCount.text = "${items.size} Houses"
+                ui.myList.adapter?.notifyDataSetChanged()
+            }
     }
 
     inner class MovieHolder(var ui: MyListItemBinding) : RecyclerView.ViewHolder(ui.root) {}
 
-    inner class MovieAdapter(private val movies: MutableList<Movie>) : RecyclerView.Adapter<MovieHolder>()
+    inner class HouseAdapter(private val houses: MutableList<House>) : RecyclerView.Adapter<MovieHolder>()
     {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainActivity.MovieHolder {
             val ui = MyListItemBinding.inflate(layoutInflater, parent, false)   //inflate a new row from the my_list_item.xml
@@ -51,12 +73,13 @@ class MainActivity : AppCompatActivity()
         }
 
         override fun getItemCount(): Int {
-            return movies.size
+            return houses.size
         }
 
         override fun onBindViewHolder(holder: MainActivity.MovieHolder, position: Int) {
-            val movie = movies[position]   //get the data at the requested position
-
+            val house = houses[position]
+            holder.ui.txtName.text = house.houseName //-----------AI----------
+            holder.ui.txtYear.text = house.address
         }
     }
 }
