@@ -77,6 +77,14 @@ class MainActivity : AppCompatActivity()
             val house = houses[position]
             holder.ui.txtName.text = house.houseName //-----------AI----------
             holder.ui.txtYear.text = house.address
+
+            holder.ui.root.setOnClickListener {
+                val intent = android.content.Intent(this@MainActivity, HouseDetailsActivity::class.java)
+                intent.putExtra("houseName", house.houseName)
+                intent.putExtra("address", house.address)
+                intent.putExtra("customerName", house.customerName)
+                startActivity(intent)
+            }
         }
     }
 }

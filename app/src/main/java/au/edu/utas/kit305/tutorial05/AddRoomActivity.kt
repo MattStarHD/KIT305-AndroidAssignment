@@ -5,22 +5,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.widget.TextView
 
-class HouseDetailsActivity : AppCompatActivity() {
+class AddRoomActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_house_details)
-
-        val houseName = intent.getStringExtra("houseName") ?: ""
-        val address = intent.getStringExtra("address") ?: ""
-        val customerName = intent.getStringExtra("customerName") ?: ""
-
-        findViewById<TextView>(R.id.lblHouseName).text = houseName
-        findViewById<TextView>(R.id.lblAddress).text = address
-        findViewById<TextView>(R.id.lblCustomerName).text = customerName
-
+        setContentView(R.layout.activity_add_room)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
