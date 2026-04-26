@@ -25,20 +25,15 @@ class MainActivity : AppCompatActivity()
         setContentView(ui.root)
 
         val db = FirebaseFirestore.getInstance()
-/*
-        val movie = hashMapOf(
-            "title" to "Test Movie Firebase"
-        )
 
-        db.collection("movies")
-            .add(movie)
-*/
         ui.lblMovieCount.text = "${items.size} Houses"
         ui.myList.adapter = HouseAdapter(houses = items)
-
-        //vertical list
         ui.myList.layoutManager = LinearLayoutManager(this)
-        // 👇 PASTE THE BLOCK HERE (INSIDE onCreate)
+
+        ui.testingButton.setOnClickListener {
+            val intent = android.content.Intent(this, AddHouseActivity::class.java)
+            startActivity(intent)
+        }
 
         db.collection("houses")
             .get()
