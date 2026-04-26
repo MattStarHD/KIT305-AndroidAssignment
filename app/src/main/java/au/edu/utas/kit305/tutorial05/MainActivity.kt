@@ -1,3 +1,5 @@
+// House list now reads from Firestore
+
 package au.edu.utas.kit305.tutorial05
 import com.google.firebase.firestore.FirebaseFirestore
 
