@@ -1,2 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/listContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#D3D3D3"
+        android:paddingTop="45dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="16dp"
+            android:layout_alignTop="@id/lblListTitle"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#000000" />
+
+        <TextView
+            android:id="@+id/lblListTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="House Name"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnEdit"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"
+            android:layout_alignTop="@id/lblListTitle"
+            android:src="@android:drawable/ic_menu_edit"
+            app:tint="#000000" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/tabContainer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnRooms"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Room"
+            android:backgroundTint="#90CAF9" />
+
+        <Button
+            android:id="@+id/btnQuote"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Quote" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="12dp"
+        tools:listitem="@layout/my_list_item" />
+
+    <Button
+        android:id="@+id/btnListAdd"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Add Room"
+        android:textSize="18sp"
+        android:backgroundTint="#BDBDBD" />
+
+</LinearLayout>

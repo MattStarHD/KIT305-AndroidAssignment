@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity()
         override fun onBindViewHolder(holder: MainActivity.MovieHolder, position: Int) {
             val house = houses[position]
             holder.ui.txtName.text = house.houseName //-----------AI----------
-            holder.ui.txtYear.text = house.address
+           // holder.ui.txtYear.text = house.address
 
             holder.ui.root.setOnClickListener {
                 val intent = android.content.Intent(this@MainActivity, HouseDetailsActivity::class.java)

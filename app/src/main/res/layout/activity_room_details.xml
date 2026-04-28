@@ -1,49 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RoomDetailsActivity">
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#D3D3D3"
+        android:paddingTop="45dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="16dp"
+            android:layout_alignTop="@id/lblRoomTitle"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#000000" />
+
+        <TextView
+            android:id="@+id/lblRoomTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Living Room"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/tabContainer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnFloorSpaces"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Floor Spaces"
+            android:backgroundTint="#90CAF9" />
+
+        <Button
+            android:id="@+id/btnWindows"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Windows"
+            android:backgroundTint="#6D50AD" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/lblTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total: $0"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:padding="16dp" />
+
+    <ImageView
+        android:id="@+id/imgRoomPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="#D3D3D3"
+        android:contentDescription="Room Image" />
 
     <Button
         android:id="@+id/btnAddFloor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Floor Space"
-        tools:layout_editor_absoluteX="178dp"
-        tools:layout_editor_absoluteY="273dp" />
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="16dp"
+        android:text="Add Floor Space" />
 
     <Button
         android:id="@+id/btnAddWindows"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Window"
-        tools:layout_editor_absoluteX="184dp"
-        tools:layout_editor_absoluteY="369dp" />
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Add Window" />
 
-    <Button
-        android:id="@+id/btnQuote"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Quote"
-        tools:layout_editor_absoluteX="210dp"
-        tools:layout_editor_absoluteY="151dp" />
-
-    <TextView
-        android:id="@+id/lblFloorSpaces"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Floor Spaces"
-        tools:layout_editor_absoluteX="112dp"
-        tools:layout_editor_absoluteY="95dp" />
-
-    <TextView
-        android:id="@+id/lblWindows"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Windows"
-        tools:layout_editor_absoluteX="238dp"
-        tools:layout_editor_absoluteY="44dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
