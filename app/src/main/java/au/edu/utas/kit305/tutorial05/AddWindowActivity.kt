@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FirebaseFirestore
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 
 class AddWindowActivity : AppCompatActivity() {
 
@@ -17,12 +19,31 @@ class AddWindowActivity : AppCompatActivity() {
     private val productLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+
         if (result.resultCode == RESULT_OK) {
+
             selectedProductId = result.data?.getStringExtra("productId") ?: ""
             selectedProductName = result.data?.getStringExtra("productName") ?: ""
             selectedProductPrice = result.data?.getDoubleExtra("productPrice", 0.0) ?: 0.0
 
+            // 👇 ADD THIS
+            val variants =
+                result.data?.getStringArrayListExtra("productVariants") ?: arrayListOf()
+
+            // set button text
             findViewById<Button>(R.id.btnSelectProduct).text = selectedProductName
+
+            // 👇 ADD THIS (spinner setup)
+            val spinnerColour = findViewById<Spinner>(R.id.spinnerColour)
+
+            val adapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item,
+                variants
+            )
+
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerColour.adapter = adapter
         }
     }
 
@@ -50,6 +71,7 @@ class AddWindowActivity : AppCompatActivity() {
         btnSaveWindow.setOnClickListener {
             val width = txtWidth.text.toString().toDoubleOrNull() ?: 0.0
             val height = txtHeight.text.toString().toDoubleOrNull() ?: 0.0
+            val spinnerColour = findViewById<Spinner>(R.id.spinnerColour)
 
             val area = (width * height) / 1_000_000
             val totalPrice = area * selectedProductPrice
@@ -64,7 +86,8 @@ class AddWindowActivity : AppCompatActivity() {
                 "height" to height,
                 "area" to area,
                 "totalPrice" to totalPrice,
-                "notes" to txtNotes.text.toString()
+                "notes" to txtNotes.text.toString(),
+                "colour" to spinnerColour.selectedItem.toString(),
             )
 
         db.collection("windows")

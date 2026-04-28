@@ -26,11 +26,17 @@ class RoomDetailsActivity : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
         var total = 0.0
 
-        val roomItems = mutableListOf<RoomItem>()
-        val recyclerRoomItems = findViewById<RecyclerView>(R.id.recyclerRoomItems)
+        val floorItems = mutableListOf<RoomItem>()
+        val windowItems = mutableListOf<RoomItem>()
 
-        recyclerRoomItems.layoutManager = LinearLayoutManager(this)
-        recyclerRoomItems.adapter = RoomItemAdapter(roomItems)
+        val recyclerFloorItems = findViewById<RecyclerView>(R.id.recyclerRoomItems)
+        val recyclerWindowItems = findViewById<RecyclerView>(R.id.recyclerWindowItems)
+
+        recyclerFloorItems.layoutManager = LinearLayoutManager(this)
+        recyclerWindowItems.layoutManager = LinearLayoutManager(this)
+
+        recyclerFloorItems.adapter = RoomItemAdapter(floorItems)
+        recyclerWindowItems.adapter = RoomItemAdapter(windowItems)
 
         db.collection("floors")
             .whereEqualTo("roomId", roomId)
@@ -43,7 +49,7 @@ class RoomDetailsActivity : AppCompatActivity() {
 
                     total += price
 
-                    roomItems.add(
+                    floorItems.add(
                         RoomItem(
                             name = document.getString("productName") ?: "",
                             details = "${width} x ${depth} mm",
@@ -52,7 +58,7 @@ class RoomDetailsActivity : AppCompatActivity() {
                     )
                 }
 
-                recyclerRoomItems.adapter?.notifyDataSetChanged()
+                recyclerFloorItems.adapter?.notifyDataSetChanged()
             }
 
         db.collection("windows")
@@ -66,7 +72,7 @@ class RoomDetailsActivity : AppCompatActivity() {
 
                     total += price
 
-                    roomItems.add(
+                    windowItems.add(
                         RoomItem(
                             name = document.getString("productName") ?: "",
                             details = "${width} x ${height} mm",
@@ -78,7 +84,7 @@ class RoomDetailsActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.lblTotal).text =
                     "Total: $${"%.2f".format(total)}"
 
-                recyclerRoomItems.adapter?.notifyDataSetChanged()
+                recyclerWindowItems.adapter?.notifyDataSetChanged()
             }
 
         findViewById<Button>(R.id.btnAddFloor).setOnClickListener {
