@@ -13,6 +13,7 @@ import android.view.ViewGroup
 
 class HouseDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val houseId = intent.getStringExtra("houseId") ?: ""
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_base_list_screen)
@@ -33,6 +34,7 @@ class HouseDetailsActivity : AppCompatActivity() {
 
         btnAdd.setOnClickListener {
             val intent = Intent(this, AddRoomActivity::class.java)
+            intent.putExtra("houseId", houseId)
             startActivity(intent)
         }
     }

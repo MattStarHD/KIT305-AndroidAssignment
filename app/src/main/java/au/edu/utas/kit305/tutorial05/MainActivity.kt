@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity()
 
             holder.ui.root.setOnClickListener {
                 val intent = android.content.Intent(this@MainActivity, HouseDetailsActivity::class.java)
+                intent.putExtra("houseId", house.id)
                 intent.putExtra("houseName", house.houseName)
                 intent.putExtra("address", house.address)
                 intent.putExtra("customerName", house.customerName)
