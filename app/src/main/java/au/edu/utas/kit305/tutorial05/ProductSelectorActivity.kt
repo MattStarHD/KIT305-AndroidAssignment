@@ -27,7 +27,15 @@ class ProductSelectorActivity : AppCompatActivity() {
         }
 
         recyclerProducts.layoutManager = LinearLayoutManager(this)
-        recyclerProducts.adapter = ProductAdapter(products)
+        recyclerProducts.adapter = ProductAdapter(products) { product ->
+            val resultIntent = android.content.Intent()
+            resultIntent.putExtra("productId", product.id)
+            resultIntent.putExtra("productName", product.name)
+            resultIntent.putExtra("productPrice", product.pricePerSquareMeter)
+
+            setResult(RESULT_OK, resultIntent)
+            finish()
+        }
     }
 
     private fun parseProducts(jsonString: String): List<Product> {

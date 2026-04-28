@@ -6,8 +6,25 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FirebaseFirestore
 import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
 
 class AddWindowActivity : AppCompatActivity() {
+
+    private var selectedProductId = ""
+    private var selectedProductName = ""
+    private var selectedProductPrice = 0.0
+
+    private val productLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            selectedProductId = result.data?.getStringExtra("productId") ?: ""
+            selectedProductName = result.data?.getStringExtra("productName") ?: ""
+            selectedProductPrice = result.data?.getDoubleExtra("productPrice", 0.0) ?: 0.0
+
+            findViewById<Button>(R.id.btnSelectProduct).text = selectedProductName
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +42,7 @@ class AddWindowActivity : AppCompatActivity() {
         btnSelectProduct.setOnClickListener {
             val intent = Intent(this, ProductSelectorActivity::class.java)
             intent.putExtra("type", "window")
-            startActivity(intent)
+            productLauncher.launch(intent)
         }
 
         val db = FirebaseFirestore.getInstance()

@@ -6,8 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ProductAdapter(private val products: List<Product>) :
-    RecyclerView.Adapter<ProductAdapter.ProductHolder>() {
+class ProductAdapter(
+    private val products: List<Product>,
+    private val onProductClick: (Product) -> Unit
+) : RecyclerView.Adapter<ProductAdapter.ProductHolder>() {
 
     inner class ProductHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val txtProductName: TextView = view.findViewById(R.id.txtProductName)
@@ -30,5 +32,9 @@ class ProductAdapter(private val products: List<Product>) :
 
         holder.txtProductName.text = product.name
         holder.txtProductPrice.text = "$${product.pricePerSquareMeter} psm"
+
+        holder.view.setOnClickListener {
+            onProductClick(product)
+        }
     }
 }

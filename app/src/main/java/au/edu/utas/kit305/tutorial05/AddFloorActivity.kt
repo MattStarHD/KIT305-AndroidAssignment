@@ -10,8 +10,25 @@ import android.widget.EditText
 import android.widget.Button
 import com.google.firebase.firestore.FirebaseFirestore
 import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
 
 class AddFloorActivity : AppCompatActivity() {
+
+    private var selectedProductId = ""
+    private var selectedProductName = ""
+    private var selectedProductPrice = 0.0
+
+    private val productLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            selectedProductId = result.data?.getStringExtra("productId") ?: ""
+            selectedProductName = result.data?.getStringExtra("productName") ?: ""
+            selectedProductPrice = result.data?.getDoubleExtra("productPrice", 0.0) ?: 0.0
+
+            findViewById<Button>(R.id.btnChooseProduct).text = selectedProductName
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +45,7 @@ class AddFloorActivity : AppCompatActivity() {
         btnChooseProduct.setOnClickListener {
             val intent = Intent(this, ProductSelectorActivity::class.java)
             intent.putExtra("type", "floor")
-            startActivity(intent)
+            productLauncher.launch(intent)
         }
 
 
