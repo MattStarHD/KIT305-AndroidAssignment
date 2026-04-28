@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import android.widget.EditText
 import android.widget.Button
 import com.google.firebase.firestore.FirebaseFirestore
+import android.content.Intent
 
 class AddFloorActivity : AppCompatActivity() {
 
@@ -22,6 +23,14 @@ class AddFloorActivity : AppCompatActivity() {
         val txtDepth = findViewById<EditText>(R.id.txtDepth)
         val txtNotes = findViewById<EditText>(R.id.txtNotes)
         val btnSaveFloor = findViewById<Button>(R.id.btnSaveFloor)
+        val btnChooseProduct = findViewById<Button>(R.id.btnChooseProduct)
+
+        btnChooseProduct.setOnClickListener {
+            val intent = Intent(this, ProductSelectorActivity::class.java)
+            intent.putExtra("type", "floor")
+            startActivity(intent)
+        }
+
 
         val db = FirebaseFirestore.getInstance()
 

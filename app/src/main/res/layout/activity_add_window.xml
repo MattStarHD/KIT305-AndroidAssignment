@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
@@ -8,6 +9,13 @@
     android:padding="16dp">
 
     <EditText
+        android:id="@+id/txtWindowName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Window Name"
+        android:inputType="text" />
+
+    <EditText
         android:id="@+id/txtWidth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,10 +23,10 @@
         android:inputType="numberDecimal" />
 
     <EditText
-        android:id="@+id/txtDepth"
+        android:id="@+id/txtHeight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Depth (mm)"
+        android:hint="Height (mm)"
         android:inputType="numberDecimal" />
 
     <EditText
@@ -29,15 +37,15 @@
         android:inputType="text" />
 
     <Button
-        android:id="@+id/btnSaveFloor"
+        android:id="@+id/btnSaveWindow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save Floor" />
+        android:text="Save Window" />
 
     <Button
-        android:id="@+id/btnChooseProduct"
+        android:id="@+id/btnSelectProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Choose Product" />
+        android:text="Select Product" />
 
 </LinearLayout>

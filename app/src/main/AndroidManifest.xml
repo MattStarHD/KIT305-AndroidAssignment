@@ -12,7 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidTutorial5"
         tools:targetApi="31">
-
+        <activity
+            android:name=".ProductSelectorActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".AddWindowActivity"
+            android:exported="false" />
         <activity
             android:name=".AddFloorActivity"
             android:exported="false" />
