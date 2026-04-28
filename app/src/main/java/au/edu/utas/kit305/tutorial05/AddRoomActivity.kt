@@ -36,7 +36,11 @@ class AddRoomActivity : AppCompatActivity() {
             db.collection("rooms")
                 .add(room)
                 .addOnSuccessListener {
+                    android.widget.Toast.makeText(this, "Room saved", android.widget.Toast.LENGTH_SHORT).show()
                     finish()
+                }
+                .addOnFailureListener { e ->
+                    android.widget.Toast.makeText(this, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
         }
     }

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.google.firebase.firestore.FirebaseFirestore
 
 class HouseDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,10 +28,25 @@ class HouseDetailsActivity : AppCompatActivity() {
         title.text = houseName
         btnAdd.text = "Add Room"
 
-        val rooms = listOf("Master Bedroom", "Bathroom", "Living Room", "Kitchen", "Laundry")
+        val db = FirebaseFirestore.getInstance() //---------------ai----------------
+        val rooms = mutableListOf<String>()
 
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = RoomTextAdapter(rooms)
+
+        db.collection("rooms")
+            .whereEqualTo("houseId", houseId)
+            .get()
+            .addOnSuccessListener { result ->
+                rooms.clear()
+
+                for (document in result) {
+                    val roomName = document.getString("roomName") ?: ""
+                    rooms.add(roomName)
+                }
+
+                recycler.adapter?.notifyDataSetChanged()
+            } //-------------------------------------------ai-------------------------
 
         btnAdd.setOnClickListener {
             val intent = Intent(this, AddRoomActivity::class.java)
