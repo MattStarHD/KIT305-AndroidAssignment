@@ -35,7 +35,7 @@ class HouseDetailsActivity : AppCompatActivity() {
         btnAdd.text = "Add Room"
 
         val db = FirebaseFirestore.getInstance() //---------------ai----------------
-        val rooms = mutableListOf<String>()
+        val rooms = mutableListOf<Room>()
 
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = RoomTextAdapter(rooms)
@@ -47,8 +47,16 @@ class HouseDetailsActivity : AppCompatActivity() {
                 rooms.clear()
 
                 for (document in result) {
-                    val roomName = document.getString("roomName") ?: ""
-                    rooms.add(roomName)
+                    rooms.add(
+                        Room(
+                            id = document.id,
+                            houseId = document.getString("houseId") ?: "",
+                            roomName = document.getString("roomName") ?: "",
+                            width = document.getDouble("width") ?: 0.0,
+                            depth = document.getDouble("depth") ?: 0.0,
+                            notes = document.getString("notes") ?: ""
+                        )
+                    )
                 }
 
                 recycler.adapter?.notifyDataSetChanged()
@@ -61,7 +69,7 @@ class HouseDetailsActivity : AppCompatActivity() {
         }
     }
 
-    inner class RoomTextAdapter(private val rooms: List<String>) :
+    inner class RoomTextAdapter(private val rooms: List<Room>) :
         RecyclerView.Adapter<RoomTextAdapter.RoomHolder>() {
 
         inner class RoomHolder(val view: android.view.View) : RecyclerView.ViewHolder(view) {
@@ -80,23 +88,18 @@ class HouseDetailsActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: RoomHolder, position: Int) {
-            val roomName = rooms[position]
+            val room = rooms[position]
 
-            holder.txtName.text = roomName
+            holder.txtName.text = room.roomName
 
             holder.itemView.setOnClickListener {
                 val intent = Intent(this@HouseDetailsActivity, RoomDetailsActivity::class.java)
-                intent.putExtra("roomName", roomName)
-                startActivity(intent)
-            }
-
-            holder.view.setOnClickListener {
-                val intent = Intent(this@HouseDetailsActivity, RoomDetailsActivity::class.java)
-                intent.putExtra("roomName", roomName)
+                intent.putExtra("roomId", room.id)
+                intent.putExtra("roomName", room.roomName)
                 startActivity(intent)
             }
         }
-        }
+    }
     }
 
 
