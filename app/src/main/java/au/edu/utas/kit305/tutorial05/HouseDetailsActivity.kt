@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.ImageView
 
 class HouseDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,6 +19,11 @@ class HouseDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_base_list_screen)
+        val btnBack = findViewById<ImageView>(R.id.btnBack)
+
+        btnBack.setOnClickListener {
+            finish()
+        }
 
         val houseName = intent.getStringExtra("houseName") ?: "House Name"
 
@@ -77,6 +83,12 @@ class HouseDetailsActivity : AppCompatActivity() {
             val roomName = rooms[position]
 
             holder.txtName.text = roomName
+
+            holder.itemView.setOnClickListener {
+                val intent = Intent(this@HouseDetailsActivity, RoomDetailsActivity::class.java)
+                intent.putExtra("roomName", roomName)
+                startActivity(intent)
+            }
 
             holder.view.setOnClickListener {
                 val intent = Intent(this@HouseDetailsActivity, RoomDetailsActivity::class.java)
