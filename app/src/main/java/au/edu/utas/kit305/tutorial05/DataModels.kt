@@ -44,8 +44,15 @@ data class Window(
 
 data class Product(
     val id: String = "",
-    val type: String = "", // floor or window
+    val type: String = "",
     val name: String = "",
     val pricePerSquareMeter: Double = 0.0,
     val description: String = "",
+    val variants: List<String> = emptyList()
+)
+
+data class RoomItem(
+    val name: String = "",
+    val details: String = "",
+    val price: Double = 0.0
 )

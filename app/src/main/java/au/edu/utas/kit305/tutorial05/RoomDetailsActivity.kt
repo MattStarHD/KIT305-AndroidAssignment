@@ -9,6 +9,9 @@ import android.widget.TextView
 import android.widget.ImageView
 import android.content.Intent
 import android.widget.Button
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class RoomDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,6 +22,64 @@ class RoomDetailsActivity : AppCompatActivity() {
         val roomName = intent.getStringExtra("roomName") ?: "Room"
 
         findViewById<TextView>(R.id.lblRoomTitle).text = roomName
+
+        val db = FirebaseFirestore.getInstance()
+        var total = 0.0
+
+        val roomItems = mutableListOf<RoomItem>()
+        val recyclerRoomItems = findViewById<RecyclerView>(R.id.recyclerRoomItems)
+
+        recyclerRoomItems.layoutManager = LinearLayoutManager(this)
+        recyclerRoomItems.adapter = RoomItemAdapter(roomItems)
+
+        db.collection("floors")
+            .whereEqualTo("roomId", roomId)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val price = document.getDouble("totalPrice") ?: 0.0
+                    val width = document.getDouble("width") ?: 0.0
+                    val depth = document.getDouble("depth") ?: 0.0
+
+                    total += price
+
+                    roomItems.add(
+                        RoomItem(
+                            name = document.getString("productName") ?: "",
+                            details = "${width} x ${depth} mm",
+                            price = price
+                        )
+                    )
+                }
+
+                recyclerRoomItems.adapter?.notifyDataSetChanged()
+            }
+
+        db.collection("windows")
+            .whereEqualTo("roomId", roomId)
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val price = document.getDouble("totalPrice") ?: 0.0
+                    val width = document.getDouble("width") ?: 0.0
+                    val height = document.getDouble("height") ?: 0.0
+
+                    total += price
+
+                    roomItems.add(
+                        RoomItem(
+                            name = document.getString("productName") ?: "",
+                            details = "${width} x ${height} mm",
+                            price = price
+                        )
+                    )
+                }
+
+                findViewById<TextView>(R.id.lblTotal).text =
+                    "Total: $${"%.2f".format(total)}"
+
+                recyclerRoomItems.adapter?.notifyDataSetChanged()
+            }
 
         findViewById<Button>(R.id.btnAddFloor).setOnClickListener {
             val intent = Intent(this, AddFloorActivity::class.java)

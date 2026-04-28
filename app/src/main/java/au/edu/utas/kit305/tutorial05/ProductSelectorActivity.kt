@@ -29,9 +29,15 @@ class ProductSelectorActivity : AppCompatActivity() {
         recyclerProducts.layoutManager = LinearLayoutManager(this)
         recyclerProducts.adapter = ProductAdapter(products) { product ->
             val resultIntent = android.content.Intent()
+
             resultIntent.putExtra("productId", product.id)
             resultIntent.putExtra("productName", product.name)
             resultIntent.putExtra("productPrice", product.pricePerSquareMeter)
+
+            resultIntent.putStringArrayListExtra(
+                "productVariants",
+                ArrayList(product.variants)
+            )
 
             setResult(RESULT_OK, resultIntent)
             finish()
@@ -45,15 +51,26 @@ class ProductSelectorActivity : AppCompatActivity() {
         val dataArray = jsonObject.getJSONArray("data")
 
         for (i in 0 until dataArray.length()) {
+
             val item = dataArray.getJSONObject(i)
 
+            // 👉 ADD THIS BLOCK HERE
+            val variantsArray = item.getJSONArray("variants")
+            val variants = mutableListOf<String>()
+
+            for (j in 0 until variantsArray.length()) {
+                variants.add(variantsArray.getString(j))
+            }
+
+            // 👉 THEN KEEP THIS (but add variants at the end)
             products.add(
                 Product(
                     id = item.getString("id"),
                     type = item.getString("category"),
                     name = item.getString("name"),
                     pricePerSquareMeter = item.getDouble("price_per_sqm"),
-                    description = item.getString("description")
+                    description = item.getString("description"),
+                    variants = variants   // 👈 ADD THIS LINE
                 )
             )
         }

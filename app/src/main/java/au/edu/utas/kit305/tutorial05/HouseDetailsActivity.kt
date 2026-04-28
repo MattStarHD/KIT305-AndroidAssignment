@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.google.firebase.firestore.FirebaseFirestore
 import android.widget.ImageView
+import android.util.Log
 
 class HouseDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,7 +93,9 @@ class HouseDetailsActivity : AppCompatActivity() {
 
             holder.txtName.text = room.roomName
 
-            holder.itemView.setOnClickListener {
+            holder.view.setOnClickListener {
+                Log.d("ROOM_DEBUG", "Clicked room id: ${room.id}")
+
                 val intent = Intent(this@HouseDetailsActivity, RoomDetailsActivity::class.java)
                 intent.putExtra("roomId", room.id)
                 intent.putExtra("roomName", room.roomName)

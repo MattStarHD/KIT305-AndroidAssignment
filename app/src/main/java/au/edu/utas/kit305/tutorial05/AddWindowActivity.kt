@@ -48,24 +48,30 @@ class AddWindowActivity : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
 
         btnSaveWindow.setOnClickListener {
-            val width = txtWidth.text.toString().toDoubleOrNull()
-            val height = txtHeight.text.toString().toDoubleOrNull()
+            val width = txtWidth.text.toString().toDoubleOrNull() ?: 0.0
+            val height = txtHeight.text.toString().toDoubleOrNull() ?: 0.0
 
-            val area = if (width != null && height != null) {
-                (width * height) / 1_000_000
-            } else {
-                0.0
-            }
+            val area = (width * height) / 1_000_000
+            val totalPrice = area * selectedProductPrice
+
 
             val window = hashMapOf(
                 "roomId" to roomId,
-                "windowName" to txtWindowName.text.toString(),
+                "productId" to selectedProductId,
+                "productName" to selectedProductName,
+                "pricePerSquareMeter" to selectedProductPrice,
                 "width" to width,
                 "height" to height,
-                "notes" to txtNotes.text.toString(),
                 "area" to area,
-                "totalPrice" to 0.0
+                "totalPrice" to totalPrice,
+                "notes" to txtNotes.text.toString()
             )
+
+        db.collection("windows")
+            .add(window)
+            .addOnSuccessListener {
+                finish()
+            }
 
             db.collection("windows")
                 .add(window)

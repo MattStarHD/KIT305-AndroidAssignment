@@ -48,4 +48,9 @@
         android:layout_height="wrap_content"
         android:text="Select Product" />
 
+    <Spinner
+        android:id="@+id/spinnerColour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>
