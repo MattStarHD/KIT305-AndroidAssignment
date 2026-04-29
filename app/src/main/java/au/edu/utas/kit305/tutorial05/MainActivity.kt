@@ -60,6 +60,35 @@ class MainActivity : AppCompatActivity()
             }
     }
 
+    private fun loadHouses() {
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("houses")
+            .get()
+            .addOnSuccessListener { result ->
+                items.clear()
+
+                for (document in result) {
+                    items.add(
+                        House(
+                            id = document.id,
+                            houseName = document.getString("houseName") ?: "",
+                            address = document.getString("address") ?: "",
+                            customerName = document.getString("customerName") ?: ""
+                        )
+                    )
+                }
+
+                ui.lblMovieCount.text = "${items.size} Houses"
+                ui.myList.adapter?.notifyDataSetChanged()
+            }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadHouses()
+    }
+
     inner class MovieHolder(var ui: MyListItemBinding) : RecyclerView.ViewHolder(ui.root) {}
 
     inner class HouseAdapter(private val houses: MutableList<House>) : RecyclerView.Adapter<MovieHolder>()
