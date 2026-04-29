@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 
 class AddFloorActivity : AppCompatActivity() {
 
@@ -60,15 +61,37 @@ class AddFloorActivity : AppCompatActivity() {
         val btnSaveFloor = findViewById<Button>(R.id.btnSaveFloor)
         val btnChooseProduct = findViewById<Button>(R.id.btnChooseProduct)
         val spinnerColour = findViewById<Spinner>(R.id.spinnerColour)
+        val db = FirebaseFirestore.getInstance()
+        val floorId = intent.getStringExtra("floorId")
+        val editMode = intent.getBooleanExtra("editMode", false)
+
+        if (editMode && floorId != null) {
+            db.collection("floors")
+                .document(floorId)
+                .get()
+                .addOnSuccessListener { document ->
+
+                    val width = document.getDouble("width") ?: 0.0
+                    val depth = document.getDouble("depth") ?: 0.0
+                    val notes = document.getString("notes") ?: ""
+
+                    txtWidth.setText(width.toString())
+                    txtDepth.setText(depth.toString())
+                    txtNotes.setText(notes)
+
+                    selectedProductId = document.getString("productId") ?: ""
+                    selectedProductName = document.getString("productName") ?: ""
+                    selectedProductPrice = document.getDouble("pricePerSquareMeter") ?: 0.0
+
+                    btnChooseProduct.text = selectedProductName
+                }
+        }
 
         btnChooseProduct.setOnClickListener {
             val intent = Intent(this, ProductSelectorActivity::class.java)
             intent.putExtra("type", "floor")
             productLauncher.launch(intent)
         }
-
-
-        val db = FirebaseFirestore.getInstance()
 
         btnSaveFloor.setOnClickListener {
             val width = txtWidth.text.toString().toDoubleOrNull() ?: 0.0
@@ -87,15 +110,30 @@ class AddFloorActivity : AppCompatActivity() {
                 "area" to area,
                 "totalPrice" to totalPrice,
                 "notes" to txtNotes.text.toString(),
-                "colour" to spinnerColour.selectedItem.toString(),
+                "colour" to (spinnerColour.selectedItem?.toString() ?: ""),
             )
 
 
-            db.collection("floors")
-                .add(floor)
-                .addOnSuccessListener {
-                    finish()
-                }
+            Toast.makeText(
+                this,
+                "editMode=$editMode floorId=$floorId width=$width",
+                Toast.LENGTH_LONG
+            ).show()
+
+            if (editMode && floorId != null) {
+                db.collection("floors")
+                    .document(floorId)
+                    .set(floor)
+                    .addOnSuccessListener {
+                        finish()
+                    }
+            } else {
+                db.collection("floors")
+                    .add(floor)
+                    .addOnSuccessListener {
+                        finish()
+                    }
+            }
         }
     }
 }

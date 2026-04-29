@@ -10,14 +10,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import android.widget.Button
 
-class RoomItemAdapter(private val items: List<RoomItem>) :
+class RoomItemAdapter(
+    private val items: List<RoomItem>,
+    private val onEdit: (RoomItem) -> Unit
+) :
     RecyclerView.Adapter<RoomItemAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val txtName: TextView = view.findViewById(R.id.txtName)
         val txtDetails: TextView = view.findViewById(R.id.txtDetails)
         val txtPrice: TextView = view.findViewById(R.id.txtPrice)
+
+        val btnEdit: Button = view.findViewById(R.id.btnEdit)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,5 +40,8 @@ class RoomItemAdapter(private val items: List<RoomItem>) :
         holder.txtName.text = item.name
         holder.txtDetails.text = item.details
         holder.txtPrice.text = "$${"%.2f".format(item.price)}"
+        holder.btnEdit.setOnClickListener {
+            onEdit(item)
+        }
     }
 }

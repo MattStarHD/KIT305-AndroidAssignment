@@ -12,6 +12,8 @@ import android.widget.Button
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
+import android.app.AlertDialog
 
 class RoomDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,8 +37,22 @@ class RoomDetailsActivity : AppCompatActivity() {
         recyclerFloorItems.layoutManager = LinearLayoutManager(this)
         recyclerWindowItems.layoutManager = LinearLayoutManager(this)
 
-        recyclerFloorItems.adapter = RoomItemAdapter(floorItems)
-        recyclerWindowItems.adapter = RoomItemAdapter(windowItems)
+            recyclerFloorItems.adapter = RoomItemAdapter(floorItems) { item ->
+                val intent = Intent(this, AddFloorActivity::class.java)
+                intent.putExtra("floorId", item.id)
+                intent.putExtra("roomId", roomId)
+                intent.putExtra("editMode", true)
+                startActivity(intent)
+            }
+
+
+            recyclerWindowItems.adapter = RoomItemAdapter(windowItems) { item ->
+                val intent = Intent(this, AddWindowActivity::class.java)
+                intent.putExtra("windowId", item.id)
+                intent.putExtra("roomId", roomId)
+                intent.putExtra("editMode", true)
+                startActivity(intent)
+            }
 
         db.collection("floors")
             .whereEqualTo("roomId", roomId)
@@ -51,7 +67,8 @@ class RoomDetailsActivity : AppCompatActivity() {
 
                     floorItems.add(
                         RoomItem(
-                            name = document.getString("productName") ?: "",
+                            id = document.id,
+                            name = document.getString("productName") ?: "Floor Space",
                             details = "${width} x ${depth} mm",
                             price = price
                         )
@@ -74,7 +91,8 @@ class RoomDetailsActivity : AppCompatActivity() {
 
                     windowItems.add(
                         RoomItem(
-                            name = document.getString("productName") ?: "",
+                            id = document.id,
+                            name = document.getString("productName") ?: "Window",
                             details = "${width} x ${height} mm",
                             price = price
                         )
@@ -110,4 +128,7 @@ class RoomDetailsActivity : AppCompatActivity() {
             insets
         }
     }
+
+
+
 }

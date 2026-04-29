@@ -52,6 +52,7 @@ data class Product(
 )
 
 data class RoomItem(
+    val id: String = "",
     val name: String = "",
     val details: String = "",
     val price: Double = 0.0
