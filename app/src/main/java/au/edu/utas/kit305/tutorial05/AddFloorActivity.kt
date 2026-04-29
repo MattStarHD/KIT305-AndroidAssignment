@@ -15,6 +15,8 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
+import android.app.AlertDialog
+import android.view.View
 
 class AddFloorActivity : AppCompatActivity() {
 
@@ -64,6 +66,31 @@ class AddFloorActivity : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
         val floorId = intent.getStringExtra("floorId")
         val editMode = intent.getBooleanExtra("editMode", false)
+        val btnDeleteFloor = findViewById<Button>(R.id.btnDeleteFloor)
+
+        if (editMode) {
+            btnDeleteFloor.visibility = View.VISIBLE
+        } else {
+            btnDeleteFloor.visibility = View.GONE
+        }
+
+        btnDeleteFloor.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete Floor?")
+                .setMessage("Are you sure you want to delete this floor? This cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    if (floorId != null) {
+                        db.collection("floors")
+                            .document(floorId)
+                            .delete()
+                            .addOnSuccessListener {
+                                finish()
+                            }
+                    }
+                }
+                .setNegativeButton("Keep", null)
+                .show()
+        }
 
         if (editMode && floorId != null) {
             db.collection("floors")

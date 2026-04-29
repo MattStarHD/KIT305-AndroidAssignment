@@ -43,6 +43,12 @@
         android:text="Save Window" />
 
     <Button
+        android:id="@+id/btnDeleteWindow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Window" />
+
+    <Button
         android:id="@+id/btnSelectProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

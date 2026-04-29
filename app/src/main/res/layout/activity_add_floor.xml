@@ -35,6 +35,12 @@
         android:text="Save Floor" />
 
     <Button
+        android:id="@+id/btnDeleteFloor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Floor" />
+
+    <Button
         android:id="@+id/btnChooseProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

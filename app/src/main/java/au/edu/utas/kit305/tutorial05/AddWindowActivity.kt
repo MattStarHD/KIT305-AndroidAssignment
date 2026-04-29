@@ -9,6 +9,8 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContracts
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.app.AlertDialog
+import android.view.View
 
 class AddWindowActivity : AppCompatActivity() {
 
@@ -63,6 +65,31 @@ class AddWindowActivity : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
         val windowId = intent.getStringExtra("windowId")
         val editMode = intent.getBooleanExtra("editMode", false)
+        val btnDeleteWindow = findViewById<Button>(R.id.btnDeleteWindow)
+
+        if (editMode) {
+            btnDeleteWindow.visibility = View.VISIBLE
+        } else {
+            btnDeleteWindow.visibility = View.GONE
+        }
+
+        btnDeleteWindow.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete Window?")
+                .setMessage("Are you sure you want to delete this window? This cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    if (windowId != null) {
+                        db.collection("windows")
+                            .document(windowId)
+                            .delete()
+                            .addOnSuccessListener {
+                                finish()
+                            }
+                    }
+                }
+                .setNegativeButton("Keep", null)
+                .show()
+        }
 
         if (editMode && windowId != null) {
             db.collection("windows")
