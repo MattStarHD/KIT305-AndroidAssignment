@@ -38,6 +38,7 @@ class HouseDetailsActivity : AppCompatActivity() {
 
         val title = findViewById<TextView>(R.id.lblListTitle)
         val btnAdd = findViewById<Button>(R.id.btnListAdd)
+        val btnQuote = findViewById<Button>(R.id.btnQuote)
         recycler = findViewById(R.id.recyclerList)
 
             btnEdit.setOnClickListener {
@@ -49,11 +50,19 @@ class HouseDetailsActivity : AppCompatActivity() {
 
         title.text = houseName
         btnAdd.text = "Add Room"
+        btnQuote.text = "Quote"
+
+        btnQuote.setOnClickListener {
+            val intent = Intent(this, QuoteActivity::class.java)
+            intent.putExtra("houseId", houseId)
+            intent.putExtra("houseName", houseName)
+            startActivity(intent)
+        }
 
         db = FirebaseFirestore.getInstance()
 
         recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = RoomTextAdapter(rooms)
+        recycler.adapter = RoomTextAdapter(rooms, houseName)
 
         loadRooms()
 
@@ -93,7 +102,10 @@ class HouseDetailsActivity : AppCompatActivity() {
             }
     }
 
-    inner class RoomTextAdapter(private val rooms: List<Room>) :
+    inner class RoomTextAdapter(
+        private val rooms: List<Room>,
+        private val houseName: String
+    ) :
         RecyclerView.Adapter<RoomTextAdapter.RoomHolder>() {
 
         inner class RoomHolder(val view: android.view.View) : RecyclerView.ViewHolder(view) {
@@ -134,6 +146,8 @@ class HouseDetailsActivity : AppCompatActivity() {
                     val intent = Intent(holder.view.context, RoomDetailsActivity::class.java)
                     intent.putExtra("roomId", room.id)
                     intent.putExtra("roomName", room.roomName)
+                    intent.putExtra("houseId", room.houseId)
+                    intent.putExtra("houseName", houseName)
                     holder.view.context.startActivity(intent)
                 }
             }

@@ -22,11 +22,12 @@ class RoomDetailsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_room_details)
         val roomId = intent.getStringExtra("roomId") ?: ""
         val roomName = intent.getStringExtra("roomName") ?: "Room"
+        val houseId = intent.getStringExtra("houseId") ?: ""
+        val houseName = intent.getStringExtra("houseName") ?: ""
 
         findViewById<TextView>(R.id.lblRoomTitle).text = roomName
 
         val db = FirebaseFirestore.getInstance()
-        var total = 0.0
 
         val floorItems = mutableListOf<RoomItem>()
         val windowItems = mutableListOf<RoomItem>()
@@ -54,55 +55,64 @@ class RoomDetailsActivity : AppCompatActivity() {
                 startActivity(intent)
             }
 
+        fun updateTotal() {
+            val floorTotal = floorItems.sumOf { it.price }
+            val windowTotal = windowItems.sumOf { it.price }
+
+            findViewById<TextView>(R.id.lblTotal).text =
+                "Total: $${"%.2f".format(floorTotal + windowTotal)}"
+        }
+
         db.collection("floors")
             .whereEqualTo("roomId", roomId)
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    val price = document.getDouble("totalPrice") ?: 0.0
-                    val width = document.getDouble("width") ?: 0.0
-                    val depth = document.getDouble("depth") ?: 0.0
+            .addSnapshotListener { result, _ ->
+                floorItems.clear()
 
-                    total += price
+                if (result != null) {
+                    for (document in result) {
+                        val price = document.getDouble("totalPrice") ?: 0.0
+                        val width = document.getDouble("width") ?: 0.0
+                        val depth = document.getDouble("depth") ?: 0.0
 
-                    floorItems.add(
-                        RoomItem(
-                            id = document.id,
-                            name = document.getString("productName") ?: "Floor Space",
-                            details = "${width} x ${depth} mm",
-                            price = price
+                        floorItems.add(
+                            RoomItem(
+                                id = document.id,
+                                name = document.getString("productName") ?: "Floor Space",
+                                details = "${width} x ${depth} mm",
+                                price = price
+                            )
                         )
-                    )
+                    }
                 }
 
                 recyclerFloorItems.adapter?.notifyDataSetChanged()
+                updateTotal()
             }
 
         db.collection("windows")
             .whereEqualTo("roomId", roomId)
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    val price = document.getDouble("totalPrice") ?: 0.0
-                    val width = document.getDouble("width") ?: 0.0
-                    val height = document.getDouble("height") ?: 0.0
+            .addSnapshotListener { result, _ ->
+                windowItems.clear()
 
-                    total += price
+                if (result != null) {
+                    for (document in result) {
+                        val price = document.getDouble("totalPrice") ?: 0.0
+                        val width = document.getDouble("width") ?: 0.0
+                        val height = document.getDouble("height") ?: 0.0
 
-                    windowItems.add(
-                        RoomItem(
-                            id = document.id,
-                            name = document.getString("productName") ?: "Window",
-                            details = "${width} x ${height} mm",
-                            price = price
+                        windowItems.add(
+                            RoomItem(
+                                id = document.id,
+                                name = document.getString("productName") ?: "Window",
+                                details = "${width} x ${height} mm",
+                                price = price
+                            )
                         )
-                    )
+                    }
                 }
 
-                findViewById<TextView>(R.id.lblTotal).text =
-                    "Total: $${"%.2f".format(total)}"
-
                 recyclerWindowItems.adapter?.notifyDataSetChanged()
+                updateTotal()
             }
 
         findViewById<Button>(R.id.btnAddFloor).setOnClickListener {
@@ -117,18 +127,23 @@ class RoomDetailsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        findViewById<Button>(R.id.btnQuote).setOnClickListener {
+            val intent = Intent(this, QuoteActivity::class.java)
+            intent.putExtra("houseId", houseId)
+            intent.putExtra("houseName", houseName)
+            startActivity(intent)
+        }
+
         val btnBack = findViewById<ImageView>(R.id.btnBack)
 
         btnBack.setOnClickListener {
             finish()
         }
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
     }
-
-
-
 }
