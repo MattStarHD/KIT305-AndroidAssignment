@@ -16,9 +16,13 @@ import android.util.Log
 
 class HouseDetailsActivity : AppCompatActivity() {
     private var roomEditMode = false
+    private lateinit var recycler: RecyclerView
+    private lateinit var db: FirebaseFirestore
+    private val rooms = mutableListOf<Room>()
+    private var houseId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val houseId = intent.getStringExtra("houseId") ?: ""
+        houseId = intent.getStringExtra("houseId") ?: ""
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_base_list_screen)
@@ -34,7 +38,7 @@ class HouseDetailsActivity : AppCompatActivity() {
 
         val title = findViewById<TextView>(R.id.lblListTitle)
         val btnAdd = findViewById<Button>(R.id.btnListAdd)
-        val recycler = findViewById<RecyclerView>(R.id.recyclerList)
+        recycler = findViewById(R.id.recyclerList)
 
             btnEdit.setOnClickListener {
                 val intent = Intent(this, AddHouseActivity::class.java)
@@ -46,12 +50,26 @@ class HouseDetailsActivity : AppCompatActivity() {
         title.text = houseName
         btnAdd.text = "Add Room"
 
-        val db = FirebaseFirestore.getInstance() //---------------ai----------------
-        val rooms = mutableListOf<Room>()
+        db = FirebaseFirestore.getInstance()
 
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = RoomTextAdapter(rooms)
 
+        loadRooms()
+
+        btnAdd.setOnClickListener {
+            val intent = Intent(this, AddRoomActivity::class.java)
+            intent.putExtra("houseId", houseId)
+            startActivity(intent)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadRooms()
+    }
+
+    private fun loadRooms() {
         db.collection("rooms")
             .whereEqualTo("houseId", houseId)
             .get()
@@ -72,13 +90,7 @@ class HouseDetailsActivity : AppCompatActivity() {
                 }
 
                 recycler.adapter?.notifyDataSetChanged()
-            } //-------------------------------------------ai-------------------------
-
-        btnAdd.setOnClickListener {
-            val intent = Intent(this, AddRoomActivity::class.java)
-            intent.putExtra("houseId", houseId)
-            startActivity(intent)
-        }
+            }
     }
 
     inner class RoomTextAdapter(private val rooms: List<Room>) :
