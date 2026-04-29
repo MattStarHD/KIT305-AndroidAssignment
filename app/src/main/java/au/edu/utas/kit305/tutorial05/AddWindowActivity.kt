@@ -60,13 +60,37 @@ class AddWindowActivity : AppCompatActivity() {
         val btnSaveWindow = findViewById<Button>(R.id.btnSaveWindow)
         val btnSelectProduct = findViewById<Button>(R.id.btnSelectProduct)
 
+        val db = FirebaseFirestore.getInstance()
+        val windowId = intent.getStringExtra("windowId")
+        val editMode = intent.getBooleanExtra("editMode", false)
+
+        if (editMode && windowId != null) {
+            db.collection("windows")
+                .document(windowId)
+                .get()
+                .addOnSuccessListener { document ->
+
+                    val width = document.getDouble("width") ?: 0.0
+                    val height = document.getDouble("height") ?: 0.0
+                    val notes = document.getString("notes") ?: ""
+
+                    txtWidth.setText(width.toString())
+                    txtHeight.setText(height.toString())
+                    txtNotes.setText(notes)
+
+                    selectedProductId = document.getString("productId") ?: ""
+                    selectedProductName = document.getString("productName") ?: ""
+                    selectedProductPrice = document.getDouble("pricePerSquareMeter") ?: 0.0
+
+                    btnSelectProduct.text = selectedProductName
+                }
+        }
+
         btnSelectProduct.setOnClickListener {
             val intent = Intent(this, ProductSelectorActivity::class.java)
             intent.putExtra("type", "window")
             productLauncher.launch(intent)
         }
-
-        val db = FirebaseFirestore.getInstance()
 
         btnSaveWindow.setOnClickListener {
             val width = txtWidth.text.toString().toDoubleOrNull() ?: 0.0
@@ -87,13 +111,18 @@ class AddWindowActivity : AppCompatActivity() {
                 "area" to area,
                 "totalPrice" to totalPrice,
                 "notes" to txtNotes.text.toString(),
-                "colour" to spinnerColour.selectedItem.toString(),
+                "colour" to (spinnerColour.selectedItem?.toString() ?: ""),
             )
 
-        db.collection("windows")
-            .add(window)
-            .addOnSuccessListener {
-                finish()
+            if (editMode && windowId != null) {
+                db.collection("windows")
+                    .document(windowId)
+                    .set(window)
+                    .addOnSuccessListener { finish() }
+            } else {
+                db.collection("windows")
+                    .add(window)
+                    .addOnSuccessListener { finish() }
             }
 
             db.collection("windows")
