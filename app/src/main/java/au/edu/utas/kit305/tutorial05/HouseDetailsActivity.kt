@@ -15,12 +15,16 @@ import android.widget.ImageView
 import android.util.Log
 
 class HouseDetailsActivity : AppCompatActivity() {
+    private var roomEditMode = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val houseId = intent.getStringExtra("houseId") ?: ""
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_base_list_screen)
         val btnBack = findViewById<ImageView>(R.id.btnBack)
+
+        val btnEdit = findViewById<ImageView>(R.id.btnEdit)
 
         btnBack.setOnClickListener {
             finish()
@@ -31,6 +35,11 @@ class HouseDetailsActivity : AppCompatActivity() {
         val title = findViewById<TextView>(R.id.lblListTitle)
         val btnAdd = findViewById<Button>(R.id.btnListAdd)
         val recycler = findViewById<RecyclerView>(R.id.recyclerList)
+
+        btnEdit.setOnClickListener {
+            roomEditMode = !roomEditMode
+            recycler.adapter?.notifyDataSetChanged()
+        }
 
         title.text = houseName
         btnAdd.text = "Add Room"
@@ -75,6 +84,7 @@ class HouseDetailsActivity : AppCompatActivity() {
 
         inner class RoomHolder(val view: android.view.View) : RecyclerView.ViewHolder(view) {
             val txtName: TextView = view.findViewById(R.id.txtName)
+            val txtArrow: TextView = view.findViewById(R.id.txtArrow)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomHolder {
@@ -93,13 +103,25 @@ class HouseDetailsActivity : AppCompatActivity() {
 
             holder.txtName.text = room.roomName
 
-            holder.view.setOnClickListener {
-                Log.d("ROOM_DEBUG", "Clicked room id: ${room.id}")
+            if (roomEditMode) {
+                holder.txtArrow.text = "Edit"
+            } else {
+                holder.txtArrow.text = ">"
+            }
 
-                val intent = Intent(this@HouseDetailsActivity, RoomDetailsActivity::class.java)
-                intent.putExtra("roomId", room.id)
-                intent.putExtra("roomName", room.roomName)
-                startActivity(intent)
+            holder.view.setOnClickListener {
+                if (roomEditMode) {
+                    val intent = Intent(holder.view.context, AddRoomActivity::class.java)
+                    intent.putExtra("roomId", room.id)
+                    intent.putExtra("houseId", room.houseId)
+                    intent.putExtra("editMode", true)
+                    holder.view.context.startActivity(intent)
+                } else {
+                    val intent = Intent(holder.view.context, RoomDetailsActivity::class.java)
+                    intent.putExtra("roomId", room.id)
+                    intent.putExtra("roomName", room.roomName)
+                    holder.view.context.startActivity(intent)
+                }
             }
         }
     }

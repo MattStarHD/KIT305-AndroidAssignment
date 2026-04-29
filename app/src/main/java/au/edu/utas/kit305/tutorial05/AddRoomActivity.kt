@@ -8,6 +8,8 @@ import androidx.core.view.WindowInsetsCompat
 import android.widget.Button
 import android.widget.EditText
 import com.google.firebase.firestore.FirebaseFirestore
+import android.app.AlertDialog
+import android.view.View
 
 class AddRoomActivity : AppCompatActivity() {
 
@@ -21,8 +23,34 @@ class AddRoomActivity : AppCompatActivity() {
         val txtRoomWidth = findViewById<EditText>(R.id.txtRoomWidth)
         val txtRoomDepth = findViewById<EditText>(R.id.txtRoomDepth)
         val btnSaveRoom = findViewById<Button>(R.id.btnSaveRoom)
-
         val db = FirebaseFirestore.getInstance()
+        val roomId = intent.getStringExtra("roomId")
+        val editMode = intent.getBooleanExtra("editMode", false)
+        val btnDeleteRoom = findViewById<Button>(R.id.btnDeleteRoom)
+
+        if (editMode) {
+            btnDeleteRoom.visibility = View.VISIBLE
+        } else {
+            btnDeleteRoom.visibility = View.GONE
+        }
+
+        btnDeleteRoom.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete Room?")
+                .setMessage("Are you sure you want to delete this room? This cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    if (roomId != null) {
+                        db.collection("rooms")
+                            .document(roomId)
+                            .delete()
+                            .addOnSuccessListener {
+                                finish()
+                            }
+                    }
+                }
+                .setNegativeButton("Keep", null)
+                .show()
+        }
 
         btnSaveRoom.setOnClickListener {
             val room = hashMapOf(
