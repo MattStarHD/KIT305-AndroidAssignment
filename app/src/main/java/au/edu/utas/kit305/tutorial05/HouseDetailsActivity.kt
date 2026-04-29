@@ -36,10 +36,12 @@ class HouseDetailsActivity : AppCompatActivity() {
         val btnAdd = findViewById<Button>(R.id.btnListAdd)
         val recycler = findViewById<RecyclerView>(R.id.recyclerList)
 
-        btnEdit.setOnClickListener {
-            roomEditMode = !roomEditMode
-            recycler.adapter?.notifyDataSetChanged()
-        }
+            btnEdit.setOnClickListener {
+                val intent = Intent(this, AddHouseActivity::class.java)
+                intent.putExtra("houseId", houseId)
+                intent.putExtra("editMode", true)
+                startActivity(intent)
+            }
 
         title.text = houseName
         btnAdd.text = "Add Room"

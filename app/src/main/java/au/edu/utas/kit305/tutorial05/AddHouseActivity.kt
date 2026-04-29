@@ -8,6 +8,9 @@ import androidx.core.view.WindowInsetsCompat
 import android.widget.Button
 import android.widget.EditText
 import com.google.firebase.firestore.FirebaseFirestore
+import android.app.AlertDialog
+import android.view.View
+import android.widget.Toast
 class AddHouseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +23,53 @@ class AddHouseActivity : AppCompatActivity() {
         val txtAddress = findViewById<EditText>(R.id.txtAddress)
         val txtCustomerName = findViewById<EditText>(R.id.txtCustomerName)
         val btnCreate = findViewById<Button>(R.id.btnCreateHouse)
+        val houseId = intent.getStringExtra("houseId")
+        val editMode = intent.getBooleanExtra("editMode", false)
+
+        if (editMode) {
+            btnCreate.text = "Save House"
+        } else {
+            btnCreate.text = "Create"
+        }
+
+        val btnDeleteHouse = findViewById<Button>(R.id.btnDeleteHouse)
+
+        if (editMode) {
+            btnDeleteHouse.visibility = View.VISIBLE
+        } else {
+            btnDeleteHouse.visibility = View.GONE
+        }
+
+        if (editMode && houseId != null) {
+            db.collection("houses")
+                .document(houseId)
+                .get()
+                .addOnSuccessListener { document ->
+                    txtHouseName.setText(document.getString("houseName") ?: "")
+                    txtAddress.setText(document.getString("address") ?: "")
+                    txtCustomerName.setText(document.getString("customerName") ?: "")
+                }
+        }
+
+        btnDeleteHouse.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete House?")
+                .setMessage("Are you sure you want to delete this house? This cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    if (houseId != null) {
+                        db.collection("houses")
+                            .document(houseId)
+                            .delete()
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "House deleted", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+                    }
+                }
+                .setNegativeButton("Keep", null)
+                .show()
+        }
+
 
         btnCreate.setOnClickListener {
             val house = hashMapOf(
@@ -30,11 +80,22 @@ class AddHouseActivity : AppCompatActivity() {
                 "status" to "Draft"
             )
 
-            db.collection("houses")
-                .add(house)
-                .addOnSuccessListener {
-                    finish()
-                }                                //^^^^^^^^^^^^^^ai^^^^^^^^^^^^^
+            if (editMode && houseId != null) {
+                db.collection("houses")
+                    .document(houseId)
+                    .set(house)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "House updated", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+            } else {
+                db.collection("houses")
+                    .add(house)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "House created", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+            }                               //^^^^^^^^^^^^^^ai^^^^^^^^^^^^^
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
