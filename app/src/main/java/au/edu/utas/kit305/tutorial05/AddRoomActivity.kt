@@ -10,6 +10,7 @@ import android.widget.EditText
 import com.google.firebase.firestore.FirebaseFirestore
 import android.app.AlertDialog
 import android.view.View
+import android.widget.Toast
 
 class AddRoomActivity : AppCompatActivity() {
 
@@ -52,6 +53,17 @@ class AddRoomActivity : AppCompatActivity() {
                 .show()
         }
 
+        if (editMode && roomId != null) {
+            db.collection("rooms")
+                .document(roomId)
+                .get()
+                .addOnSuccessListener { document ->
+                    txtRoomName.setText(document.getString("roomName") ?: "")
+                    txtRoomWidth.setText((document.getDouble("width") ?: 0.0).toString())
+                    txtRoomDepth.setText((document.getDouble("depth") ?: 0.0).toString())
+                }
+        }
+
         btnSaveRoom.setOnClickListener {
             val room = hashMapOf(
                 "houseId" to houseId,
@@ -61,12 +73,22 @@ class AddRoomActivity : AppCompatActivity() {
                 "notes" to ""
             )
 
-            db.collection("rooms")
-                .add(room)
-                .addOnSuccessListener {
-                    android.widget.Toast.makeText(this, "Room saved", android.widget.Toast.LENGTH_SHORT).show()
-                    finish()
-                }
+            if (editMode && roomId != null) {
+                db.collection("rooms")
+                    .document(roomId)
+                    .set(room)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Room updated", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+            } else {
+                db.collection("rooms")
+                    .add(room)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Room saved", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+            }
                 .addOnFailureListener { e ->
                     android.widget.Toast.makeText(this, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
