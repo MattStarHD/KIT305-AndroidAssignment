@@ -35,7 +35,7 @@ class AddRoomActivity : AppCompatActivity() {
         ui.headerBar.btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete Room?")
-                .setMessage("Are you sure you want to delete this room? This cannot be undone.")
+                .setMessage("Are you sure you want to delete this room?")
                 .setPositiveButton("Delete") { _, _ ->
                     if (roomId != null) {
                         db.collection("rooms")
@@ -50,6 +50,7 @@ class AddRoomActivity : AppCompatActivity() {
                 .show()
         }
 
+        // load room input when editing
         if (isEdit && roomId != null) {
             db.collection("rooms")
                 .document(roomId)
@@ -62,31 +63,32 @@ class AddRoomActivity : AppCompatActivity() {
         }
 
         ui.btnSaveRoom.setOnClickListener {
-            val roomName = ui.txtRoomName.text.toString()
-            val widthText = ui.txtRoomWidth.text.toString()
-            val depthText = ui.txtRoomDepth.text.toString()
+            val roomName = ui.txtRoomName.text.toString().trim()
+            val widthText = ui.txtRoomWidth.text.toString().trim()
+            val depthText = ui.txtRoomDepth.text.toString().trim()
 
-            if (!isValidText(roomName)) {
+            val width = widthText.toDoubleOrNull()
+            val depth = depthText.toDoubleOrNull()
+
+            // check room details
+            if (roomName.isEmpty()) {
                 ui.txtRoomName.error = "Required"
                 return@setOnClickListener
             }
 
-            if (!isValidDouble(widthText)) {
+            if (width == null || width <= 0) {
                 ui.txtRoomWidth.error = "Enter a valid width"
                 return@setOnClickListener
             }
 
-            if (!isValidDouble(depthText)) {
+            if (depth == null || depth <= 0) {
                 ui.txtRoomDepth.error = "Enter a valid depth"
                 return@setOnClickListener
             }
 
-            val width = widthText.toDouble()
-            val depth = depthText.toDouble()
-
             val room = hashMapOf(
                 "houseId" to houseId,
-                "roomName" to roomName.trim(),
+                "roomName" to roomName,
                 "width" to width,
                 "depth" to depth,
                 "notes" to ""
@@ -115,14 +117,5 @@ class AddRoomActivity : AppCompatActivity() {
                     }
             }
         }
-    }
-
-    private fun isValidText(input: String): Boolean {
-        return input.trim().isNotEmpty()
-    }
-
-    private fun isValidDouble(input: String): Boolean {
-        val number = input.toDoubleOrNull()
-        return number != null && number > 0
     }
 }

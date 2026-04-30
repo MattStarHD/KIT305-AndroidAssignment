@@ -1,5 +1,6 @@
 package au.edu.utas.kit305.tutorial05
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -8,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import au.edu.utas.kit305.tutorial05.databinding.ActivityAddWindowBinding
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AddWindowActivity : AppCompatActivity() {
+class EditWindowActivity : AppCompatActivity() {
 
     private lateinit var ui: ActivityAddWindowBinding
 
@@ -25,34 +26,70 @@ class AddWindowActivity : AppCompatActivity() {
         setContentView(ui.root)
 
         val db = FirebaseFirestore.getInstance()
-        val roomId = intent.getStringExtra("roomId") ?: ""
 
-        // selected product details
+        val roomId = intent.getStringExtra("roomId") ?: ""
+        val windowId = intent.getStringExtra("windowId") ?: ""
+
         selectedProductId = intent.getStringExtra("productId") ?: ""
         selectedProductName = intent.getStringExtra("productName") ?: ""
         selectedProductPrice = intent.getDoubleExtra("productPrice", 0.0)
         selectedColour = intent.getStringExtra("selectedColour") ?: ""
         availableColours = intent.getStringArrayListExtra("productVariants") ?: arrayListOf()
 
-        // keep typed values when returning from product/colour screens
-        ui.txtWindowName.setText(intent.getStringExtra("windowName") ?: "")
-        ui.txtWidth.setText(intent.getStringExtra("width") ?: "")
-        ui.txtHeight.setText(intent.getStringExtra("height") ?: "")
-        ui.txtNotes.setText(intent.getStringExtra("notes") ?: "")
-
-        ui.headerBar.lblHeaderTitle.text = "Add Window"
-        ui.headerBar.btnDelete.visibility = View.GONE
+        ui.headerBar.lblHeaderTitle.text = "Edit Window"
+        ui.headerBar.btnDelete.visibility = View.VISIBLE
 
         ui.headerBar.btnBack.setOnClickListener {
             finish()
         }
 
-        if (selectedProductName.isNotBlank()) {
-            ui.btnSelectProduct.text = selectedProductName
+        ui.headerBar.btnDelete.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete Window?")
+                .setMessage("Are you sure you want to delete this window?")
+                .setPositiveButton("Delete") { _, _ ->
+                    db.collection("windows")
+                        .document(windowId)
+                        .delete()
+                        .addOnSuccessListener {
+                            finish()
+                        }
+                }
+                .setNegativeButton("Keep", null)
+                .show()
         }
 
-        if (selectedColour.isNotBlank()) {
-            ui.btnChooseColour.text = selectedColour
+        // load existing window details
+        if (selectedProductId.isBlank()) {
+            db.collection("windows")
+                .document(windowId)
+                .get()
+                .addOnSuccessListener { document ->
+                    ui.txtWindowName.setText(document.getString("windowName") ?: "")
+                    ui.txtWidth.setText((document.getDouble("width") ?: 0.0).toString())
+                    ui.txtHeight.setText((document.getDouble("height") ?: 0.0).toString())
+                    ui.txtNotes.setText(document.getString("notes") ?: "")
+
+                    selectedProductId = document.getString("productId") ?: ""
+                    selectedProductName = document.getString("productName") ?: ""
+                    selectedProductPrice = document.getDouble("pricePerSquareMeter") ?: 0.0
+                    selectedColour = document.getString("colour") ?: ""
+
+                    ui.btnSelectProduct.text =
+                        if (selectedProductName.isBlank()) "Choose Product" else selectedProductName
+
+                    ui.btnChooseColour.text =
+                        if (selectedColour.isBlank()) "Choose Colour" else selectedColour
+                }
+        } else {
+            ui.txtWindowName.setText(intent.getStringExtra("windowName") ?: "")
+            ui.txtWidth.setText(intent.getStringExtra("width") ?: "")
+            ui.txtHeight.setText(intent.getStringExtra("height") ?: "")
+            ui.txtNotes.setText(intent.getStringExtra("notes") ?: "")
+
+            ui.btnSelectProduct.text = selectedProductName
+            ui.btnChooseColour.text =
+                if (selectedColour.isBlank()) "Choose Colour" else selectedColour
         }
 
         ui.btnSelectProduct.setOnClickListener {
@@ -64,8 +101,9 @@ class AddWindowActivity : AppCompatActivity() {
             val notes = ui.txtNotes.text.toString()
 
             intent.putExtra("type", "window")
-            intent.putExtra("returnTo", "AddWindow")
+            intent.putExtra("returnTo", "EditWindow")
             intent.putExtra("roomId", roomId)
+            intent.putExtra("windowId", windowId)
 
             intent.putExtra("windowName", windowName)
             intent.putExtra("width", width)
@@ -78,7 +116,7 @@ class AddWindowActivity : AppCompatActivity() {
 
         ui.btnChooseColour.setOnClickListener {
             if (availableColours.isEmpty()) {
-                Toast.makeText(this, "Please choose a product first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please choose the product again first", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -89,8 +127,9 @@ class AddWindowActivity : AppCompatActivity() {
             val height = ui.txtHeight.text.toString()
             val notes = ui.txtNotes.text.toString()
 
-            intent.putExtra("returnTo", "AddWindow")
+            intent.putExtra("returnTo", "EditWindow")
             intent.putExtra("roomId", roomId)
+            intent.putExtra("windowId", windowId)
 
             intent.putExtra("windowName", windowName)
             intent.putExtra("width", width)
@@ -114,7 +153,6 @@ class AddWindowActivity : AppCompatActivity() {
             val width = widthText.toDoubleOrNull()
             val height = heightText.toDoubleOrNull()
 
-            // check window details
             if (windowName.isEmpty()) {
                 ui.txtWindowName.error = "Required"
                 return@setOnClickListener
@@ -158,7 +196,8 @@ class AddWindowActivity : AppCompatActivity() {
             )
 
             db.collection("windows")
-                .add(window)
+                .document(windowId)
+                .set(window)
                 .addOnSuccessListener {
                     finish()
                 }

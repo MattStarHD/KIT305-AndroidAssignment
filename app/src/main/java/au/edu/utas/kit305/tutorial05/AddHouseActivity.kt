@@ -24,7 +24,6 @@ class AddHouseActivity : AppCompatActivity() {
         val isEdit = intent.getBooleanExtra("editMode", false)
 
         ui.btnCreateHouse.text = if (isEdit) "Save House" else "Create"
-
         ui.headerBar.lblHeaderTitle.text = if (isEdit) "Edit House" else "Add House"
 
         ui.headerBar.btnBack.setOnClickListener {
@@ -36,7 +35,7 @@ class AddHouseActivity : AppCompatActivity() {
         ui.headerBar.btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete House?")
-                .setMessage("Are you sure you want to delete this house? This cannot be undone.")
+                .setMessage("Are you sure you want to delete this house?")
                 .setPositiveButton("Delete") { _, _ ->
                     if (houseId != null) {
                         db.collection("houses")
@@ -52,6 +51,7 @@ class AddHouseActivity : AppCompatActivity() {
                 .show()
         }
 
+        // load current house details when editing
         if (isEdit && houseId != null) {
             db.collection("houses")
                 .document(houseId)
@@ -64,29 +64,30 @@ class AddHouseActivity : AppCompatActivity() {
         }
 
         ui.btnCreateHouse.setOnClickListener {
-            val houseName = ui.txtHouseName.text.toString()
-            val address = ui.txtAddress.text.toString()
-            val customerName = ui.txtCustomerName.text.toString()
+            val houseName = ui.txtHouseName.text.toString().trim()
+            val address = ui.txtAddress.text.toString().trim()
+            val customerName = ui.txtCustomerName.text.toString().trim()
 
-            if (!isValidText(houseName)) {
+            // check each input field
+            if (houseName.isEmpty()) {
                 ui.txtHouseName.error = "Required"
                 return@setOnClickListener
             }
 
-            if (!isValidText(address)) {
+            if (address.isEmpty()) {
                 ui.txtAddress.error = "Required"
                 return@setOnClickListener
             }
 
-            if (!isValidText(customerName)) {
+            if (customerName.isEmpty()) {
                 ui.txtCustomerName.error = "Required"
                 return@setOnClickListener
             }
 
             val house = hashMapOf(
-                "houseName" to houseName.trim(),
-                "address" to address.trim(),
-                "customerName" to customerName.trim(),
+                "houseName" to houseName,
+                "address" to address,
+                "customerName" to customerName,
                 "total" to 0.0,
                 "status" to "Draft"
             )
@@ -114,9 +115,5 @@ class AddHouseActivity : AppCompatActivity() {
                     }
             }
         }
-    }
-
-    private fun isValidText(input: String): Boolean {
-        return input.trim().isNotEmpty()
     }
 }

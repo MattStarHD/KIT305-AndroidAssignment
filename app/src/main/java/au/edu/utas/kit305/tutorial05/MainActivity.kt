@@ -1,16 +1,14 @@
-// House list now reads from Firestore
-
 package au.edu.utas.kit305.tutorial05
-import com.google.firebase.firestore.FirebaseFirestore
 
 import android.annotation.SuppressLint
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import au.edu.utas.kit305.tutorial05.databinding.ActivityMainBinding
 import au.edu.utas.kit305.tutorial05.databinding.MyListItemBinding
+import com.google.firebase.firestore.FirebaseFirestore
 
 val items = mutableListOf<House>()
 
@@ -21,6 +19,7 @@ class MainActivity : AppCompatActivity()
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         ui = ActivityMainBinding.inflate(layoutInflater)
         setContentView(ui.root)
 
@@ -32,9 +31,14 @@ class MainActivity : AppCompatActivity()
             val intent = android.content.Intent(this, AddHouseActivity::class.java)
             startActivity(intent)
         }
-
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadHouses()
+    }
+
+    // load houses from Firestore
     private fun loadHouses() {
         val db = FirebaseFirestore.getInstance()
 
@@ -59,18 +63,13 @@ class MainActivity : AppCompatActivity()
             }
     }
 
-    override fun onResume() {
-        super.onResume()
-        loadHouses()
-    }
-
     inner class MovieHolder(var ui: MyListItemBinding) : RecyclerView.ViewHolder(ui.root) {}
 
     inner class HouseAdapter(private val houses: MutableList<House>) : RecyclerView.Adapter<MovieHolder>()
     {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainActivity.MovieHolder {
-            val ui = MyListItemBinding.inflate(layoutInflater, parent, false)   //inflate a new row from the my_list_item.xml
-            return MovieHolder(ui)                                                            //wrap it in a ViewHolder
+            val ui = MyListItemBinding.inflate(layoutInflater, parent, false)
+            return MovieHolder(ui)
         }
 
         override fun getItemCount(): Int {
@@ -79,8 +78,8 @@ class MainActivity : AppCompatActivity()
 
         override fun onBindViewHolder(holder: MainActivity.MovieHolder, position: Int) {
             val house = houses[position]
-            holder.ui.txtName.text = house.houseName //-----------AI----------
-           // holder.ui.txtYear.text = house.address
+
+            holder.ui.txtName.text = house.houseName
 
             holder.ui.root.setOnClickListener {
                 val intent = android.content.Intent(this@MainActivity, HouseDetailsActivity::class.java)
@@ -93,4 +92,3 @@ class MainActivity : AppCompatActivity()
         }
     }
 }
-

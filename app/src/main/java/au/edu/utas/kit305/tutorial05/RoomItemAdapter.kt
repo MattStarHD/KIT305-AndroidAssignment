@@ -24,7 +24,7 @@ class RoomItemAdapter(
 
         holder.ui.txtName.text = item.name
         holder.ui.txtDetails.text = item.details
-        holder.ui.txtPrice.text = "$${"%.2f".format(item.price)}"
+        holder.ui.txtPrice.text = "Price: $" + item.price
 
         holder.ui.btnEdit.setOnClickListener {
             onEdit(item)

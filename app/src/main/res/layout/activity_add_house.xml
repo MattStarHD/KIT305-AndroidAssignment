@@ -9,7 +9,9 @@
     android:padding="16dp"
     tools:context=".AddHouseActivity" >
 
-    <include layout="@layout/header_bar"/>
+    <include
+        android:id="@+id/headerBar"
+        layout="@layout/header_bar" />
 
     <EditText
         android:id="@+id/txtHouseName"

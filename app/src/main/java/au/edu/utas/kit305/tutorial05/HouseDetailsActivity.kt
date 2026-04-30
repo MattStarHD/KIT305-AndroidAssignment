@@ -67,6 +67,7 @@ class HouseDetailsActivity : AppCompatActivity() {
         loadRooms()
     }
 
+    // load rooms for this house
     private fun loadRooms() {
         db.collection("rooms")
             .whereEqualTo("houseId", houseId)

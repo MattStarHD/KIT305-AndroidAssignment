@@ -1,5 +1,6 @@
 package au.edu.utas.kit305.tutorial05
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -8,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import au.edu.utas.kit305.tutorial05.databinding.ActivityAddFloorBinding
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AddFloorActivity : AppCompatActivity() {
+class EditFloorActivity : AppCompatActivity() {
 
     private lateinit var ui: ActivityAddFloorBinding
 
@@ -25,44 +26,84 @@ class AddFloorActivity : AppCompatActivity() {
         setContentView(ui.root)
 
         val db = FirebaseFirestore.getInstance()
-        val roomId = intent.getStringExtra("roomId") ?: ""
 
-        // selected product details
+        val roomId = intent.getStringExtra("roomId") ?: ""
+        val floorId = intent.getStringExtra("floorId") ?: ""
+
         selectedProductId = intent.getStringExtra("productId") ?: ""
         selectedProductName = intent.getStringExtra("productName") ?: ""
         selectedProductPrice = intent.getDoubleExtra("productPrice", 0.0)
         selectedColour = intent.getStringExtra("selectedColour") ?: ""
         availableColours = intent.getStringArrayListExtra("productVariants") ?: arrayListOf()
 
-        // keep typed values when returning from product/colour screens
-        ui.txtWidth.setText(intent.getStringExtra("width") ?: "")
-        ui.txtDepth.setText(intent.getStringExtra("depth") ?: "")
-        ui.txtNotes.setText(intent.getStringExtra("notes") ?: "")
-
-        ui.headerBar.lblHeaderTitle.text = "Add Floor"
-        ui.headerBar.btnDelete.visibility = View.GONE
+        ui.headerBar.lblHeaderTitle.text = "Edit Floor"
+        ui.headerBar.btnDelete.visibility = View.VISIBLE
 
         ui.headerBar.btnBack.setOnClickListener {
             finish()
         }
 
-        if (selectedProductName.isNotBlank()) {
-            ui.btnChooseProduct.text = selectedProductName
+        ui.headerBar.btnDelete.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete Floor?")
+                .setMessage("Are you sure you want to delete this floor?")
+                .setPositiveButton("Delete") { _, _ ->
+                    db.collection("floors")
+                        .document(floorId)
+                        .delete()
+                        .addOnSuccessListener {
+                            finish()
+                        }
+                }
+                .setNegativeButton("Keep", null)
+                .show()
         }
 
-        if (selectedColour.isNotBlank()) {
-            ui.btnChooseColour.text = selectedColour
+        // load existing floor details
+        if (selectedProductId.isBlank()) {
+            db.collection("floors")
+                .document(floorId)
+                .get()
+                .addOnSuccessListener { document ->
+                    ui.txtWidth.setText((document.getDouble("width") ?: 0.0).toString())
+                    ui.txtDepth.setText((document.getDouble("depth") ?: 0.0).toString())
+                    ui.txtNotes.setText(document.getString("notes") ?: "")
+
+                    selectedProductId = document.getString("productId") ?: ""
+                    selectedProductName = document.getString("productName") ?: ""
+                    selectedProductPrice = document.getDouble("pricePerSquareMeter") ?: 0.0
+                    selectedColour = document.getString("colour") ?: ""
+
+                    ui.btnChooseProduct.text =
+                        if (selectedProductName.isBlank()) "Choose Product" else selectedProductName
+
+                    ui.btnChooseColour.text =
+                        if (selectedColour.isBlank()) "Choose Colour" else selectedColour
+                }
+        } else {
+            ui.txtWidth.setText(intent.getStringExtra("width") ?: "")
+            ui.txtDepth.setText(intent.getStringExtra("depth") ?: "")
+            ui.txtNotes.setText(intent.getStringExtra("notes") ?: "")
+
+            ui.btnChooseProduct.text = selectedProductName
+            ui.btnChooseColour.text =
+                if (selectedColour.isBlank()) "Choose Colour" else selectedColour
         }
 
         ui.btnChooseProduct.setOnClickListener {
             val intent = Intent(this, ProductSelectorActivity::class.java)
 
+            val width = ui.txtWidth.text.toString()
+            val depth = ui.txtDepth.text.toString()
+            val notes = ui.txtNotes.text.toString()
+
             intent.putExtra("type", "floor")
-            intent.putExtra("returnTo", "AddFloor")
+            intent.putExtra("returnTo", "EditFloor")
             intent.putExtra("roomId", roomId)
-            intent.putExtra("width", ui.txtWidth.text.toString())
-            intent.putExtra("depth", ui.txtDepth.text.toString())
-            intent.putExtra("notes", ui.txtNotes.text.toString())
+            intent.putExtra("floorId", floorId)
+            intent.putExtra("width", width)
+            intent.putExtra("depth", depth)
+            intent.putExtra("notes", notes)
 
             startActivity(intent)
             finish()
@@ -70,18 +111,22 @@ class AddFloorActivity : AppCompatActivity() {
 
         ui.btnChooseColour.setOnClickListener {
             if (availableColours.isEmpty()) {
-                Toast.makeText(this, "Please choose a product first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please choose the product again first", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val intent = Intent(this, ColourSelectorActivity::class.java)
 
-            intent.putExtra("returnTo", "AddFloor")
-            intent.putExtra("roomId", roomId)
-            intent.putExtra("width", ui.txtWidth.text.toString())
-            intent.putExtra("depth", ui.txtDepth.text.toString())
-            intent.putExtra("notes", ui.txtNotes.text.toString())
+            val width = ui.txtWidth.text.toString()
+            val depth = ui.txtDepth.text.toString()
+            val notes = ui.txtNotes.text.toString()
 
+            intent.putExtra("returnTo", "EditFloor")
+            intent.putExtra("roomId", roomId)
+            intent.putExtra("floorId", floorId)
+            intent.putExtra("width", width)
+            intent.putExtra("depth", depth)
+            intent.putExtra("notes", notes)
             intent.putExtra("productId", selectedProductId)
             intent.putExtra("productName", selectedProductName)
             intent.putExtra("productPrice", selectedProductPrice)
@@ -98,7 +143,6 @@ class AddFloorActivity : AppCompatActivity() {
             val width = widthText.toDoubleOrNull()
             val depth = depthText.toDoubleOrNull()
 
-            // check floor size
             if (width == null || width <= 0) {
                 ui.txtWidth.error = "Enter a valid width"
                 return@setOnClickListener
@@ -136,7 +180,8 @@ class AddFloorActivity : AppCompatActivity() {
             )
 
             db.collection("floors")
-                .add(floor)
+                .document(floorId)
+                .set(floor)
                 .addOnSuccessListener {
                     finish()
                 }
