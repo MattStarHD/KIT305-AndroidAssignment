@@ -90,11 +90,33 @@ class AddHouseActivity : AppCompatActivity() {
         }
 
 
+
         btnCreate.setOnClickListener {
+            val houseName = txtHouseName.text.toString()
+            val address = txtAddress.text.toString()
+            val customerName = txtCustomerName.text.toString()
+
+            if (!isValidText(houseName)) {
+                txtHouseName.error = "Required"
+                return@setOnClickListener
+            }
+
+            if (!isValidText(address)) {
+                txtAddress.error = "Required"
+                return@setOnClickListener
+            }
+
+            if (!isValidText(customerName)) {
+                txtCustomerName.error = "Required"
+                return@setOnClickListener
+            }
+
             val house = hashMapOf(
-                "houseName" to txtHouseName.text.toString(),
-                "address" to txtAddress.text.toString(),
-                "customerName" to txtCustomerName.text.toString(),
+
+
+                "houseName" to houseName.trim(),
+                "address" to address.trim(),
+                "customerName" to customerName.trim(),
                 "total" to 0.0,
                 "status" to "Draft"
             )
@@ -123,4 +145,9 @@ class AddHouseActivity : AppCompatActivity() {
             insets
         }
     }
+
+        private fun isValidText(input: String): Boolean {
+            return input.trim().isNotEmpty()
+        }
+
 }

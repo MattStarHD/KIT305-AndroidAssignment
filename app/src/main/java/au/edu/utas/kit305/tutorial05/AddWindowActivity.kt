@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.Toast
 
 class AddWindowActivity : AppCompatActivity() {
 
@@ -133,15 +134,44 @@ class AddWindowActivity : AppCompatActivity() {
         }
 
         btnSaveWindow.setOnClickListener {
-            val width = txtWidth.text.toString().toDoubleOrNull() ?: 0.0
-            val height = txtHeight.text.toString().toDoubleOrNull() ?: 0.0
+            val windowName = txtWindowName.text.toString()
+            val widthText = txtWidth.text.toString()
+            val heightText = txtHeight.text.toString()
+
+            if (!isValidText(windowName)) {
+                txtWindowName.error = "Required"
+                return@setOnClickListener
+            }
+
+            if (!isValidDouble(widthText)) {
+                txtWidth.error = "Enter a valid width"
+                return@setOnClickListener
+            }
+
+            if (!isValidDouble(heightText)) {
+                txtHeight.error = "Enter a valid height"
+                return@setOnClickListener
+            }
+
+            if (selectedProductId.isBlank() || selectedProductName.isBlank()) {
+                Toast.makeText(this, "Please choose a product", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (selectedColour.isBlank()) {
+                Toast.makeText(this, "Please choose a colour", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val width = widthText.toDouble()
+            val height = heightText.toDouble()
 
             val area = (width * height) / 1_000_000
             val totalPrice = area * selectedProductPrice
 
             val window = hashMapOf(
                 "roomId" to roomId,
-                "windowName" to txtWindowName.text.toString(),
+                "windowName" to windowName.trim(),
                 "productId" to selectedProductId,
                 "productName" to selectedProductName,
                 "pricePerSquareMeter" to selectedProductPrice,
@@ -149,7 +179,7 @@ class AddWindowActivity : AppCompatActivity() {
                 "height" to height,
                 "area" to area,
                 "totalPrice" to totalPrice,
-                "notes" to txtNotes.text.toString(),
+                "notes" to txtNotes.text.toString().trim(),
                 "colour" to selectedColour
             )
 
@@ -169,4 +199,14 @@ class AddWindowActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun isValidText(input: String): Boolean {
+        return input.trim().isNotEmpty()
+    }
+
+    private fun isValidDouble(input: String): Boolean {
+        val number = input.toDoubleOrNull()
+        return number != null && number > 0
+    }
+
 }

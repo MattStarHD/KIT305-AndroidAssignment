@@ -47,7 +47,7 @@ class AddRoomActivity : AppCompatActivity() {
 
         btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
 
-        title.text = if (isEdit) "Edit Floor" else "Add Floor"
+        title.text = if (isEdit) "Edit Room" else "Add Room"
 
 // Show trash icon only when editing
         if (isEdit) {
@@ -55,13 +55,6 @@ class AddRoomActivity : AppCompatActivity() {
         }
 
         back.setOnClickListener {
-            finish()
-        }
-
-        findViewById<TextView>(R.id.lblHeaderTitle).text =
-            if (isEdit) "Edit Room" else "Add Room"
-
-        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
             finish()
         }
 
@@ -95,11 +88,33 @@ class AddRoomActivity : AppCompatActivity() {
         }
 
         btnSaveRoom.setOnClickListener {
+            val roomName = txtRoomName.text.toString()
+            val widthText = txtRoomWidth.text.toString()
+            val depthText = txtRoomDepth.text.toString()
+
+            if (!isValidText(roomName)) {
+                txtRoomName.error = "Required"
+                return@setOnClickListener
+            }
+
+            if (!isValidDouble(widthText)) {
+                txtRoomWidth.error = "Enter a valid width"
+                return@setOnClickListener
+            }
+
+            if (!isValidDouble(depthText)) {
+                txtRoomDepth.error = "Enter a valid depth"
+                return@setOnClickListener
+            }
+
+            val width = widthText.toDouble()
+            val depth = depthText.toDouble()
+
             val room = hashMapOf(
                 "houseId" to houseId,
-                "roomName" to txtRoomName.text.toString(),
-                "width" to txtRoomWidth.text.toString().toDoubleOrNull(),
-                "depth" to txtRoomDepth.text.toString().toDoubleOrNull(),
+                "roomName" to roomName.trim(),
+                "width" to width,
+                "depth" to depth,
                 "notes" to ""
             )
 
@@ -123,5 +138,14 @@ class AddRoomActivity : AppCompatActivity() {
                     android.widget.Toast.makeText(this, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
         }
+    }
+
+    private fun isValidText(input: String): Boolean {
+        return input.trim().isNotEmpty()
+    }
+
+    private fun isValidDouble(input: String): Boolean {
+        val number = input.toDoubleOrNull()
+        return number != null && number > 0
     }
 }

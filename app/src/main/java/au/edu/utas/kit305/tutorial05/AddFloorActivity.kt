@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.Toast
 
 class AddFloorActivity : AppCompatActivity() {
 
@@ -130,8 +131,31 @@ class AddFloorActivity : AppCompatActivity() {
         }
 
         btnSaveFloor.setOnClickListener {
-            val width = txtWidth.text.toString().toDoubleOrNull() ?: 0.0
-            val depth = txtDepth.text.toString().toDoubleOrNull() ?: 0.0
+            val widthText = txtWidth.text.toString()
+            val depthText = txtDepth.text.toString()
+
+            if (!isValidDouble(widthText)) {
+                txtWidth.error = "Enter a valid width"
+                return@setOnClickListener
+            }
+
+            if (!isValidDouble(depthText)) {
+                txtDepth.error = "Enter a valid depth"
+                return@setOnClickListener
+            }
+
+            if (selectedProductId.isBlank() || selectedProductName.isBlank()) {
+                Toast.makeText(this, "Please choose a product", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (selectedColour.isBlank()) {
+                Toast.makeText(this, "Please choose a colour", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val width = widthText.toDouble()
+            val depth = depthText.toDouble()
 
             val area = (width * depth) / 1_000_000
             val totalPrice = area * selectedProductPrice
@@ -145,7 +169,7 @@ class AddFloorActivity : AppCompatActivity() {
                 "depth" to depth,
                 "area" to area,
                 "totalPrice" to totalPrice,
-                "notes" to txtNotes.text.toString(),
+                "notes" to txtNotes.text.toString().trim(),
                 "colour" to selectedColour
             )
 
@@ -165,4 +189,10 @@ class AddFloorActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun isValidDouble(input: String): Boolean {
+        val number = input.toDoubleOrNull()
+        return number != null && number > 0
+    }
+
 }
