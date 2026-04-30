@@ -102,7 +102,20 @@ class QuoteActivity : AppCompatActivity() {
                         val keys = roomItems[roomId] ?: mutableListOf()
 
                         if (isChecked) {
-                            selectedPrices[labourKey] = 200.0
+                            for (key in keys) {
+                                if (key == labourKey) {
+                                    selectedPrices[key] = 200.0
+                                } else {
+                                    val checkBox = roomBox.findViewWithTag<CheckBox>(key)
+
+                                    if (checkBox != null && checkBox.isChecked) {
+                                        val priceText = checkBox.text.toString()
+                                            .substringAfterLast("Price: $")
+
+                                        selectedPrices[key] = priceText.toDoubleOrNull() ?: 0.0
+                                    }
+                                }
+                            }
                         } else {
                             for (key in keys) {
                                 selectedPrices.remove(key)
@@ -111,6 +124,7 @@ class QuoteActivity : AppCompatActivity() {
 
                         floorContainer.isEnabled = isChecked
                         windowContainer.isEnabled = isChecked
+
                         updateTotal()
                         updateRoomTotal(roomTotalText, roomId)
                     }
@@ -141,6 +155,7 @@ class QuoteActivity : AppCompatActivity() {
                     roomItems[roomId]?.add(itemKey)
 
                     val checkBox = CheckBox(this)
+                    checkBox.tag = itemKey
                     checkBox.text =
                         "$productName\n${width}mm x ${depth}mm\nColour: $colour\nPrice: $${"%.2f".format(price)}"
                     checkBox.isChecked = true
@@ -185,6 +200,7 @@ class QuoteActivity : AppCompatActivity() {
                     roomItems[roomId]?.add(itemKey)
 
                     val checkBox = CheckBox(this)
+                    checkBox.tag = itemKey
                     checkBox.text =
                         "$productName\n$windowName\n${width}mm x ${height}mm\nColour: $colour\nPrice: $${"%.2f".format(price)}"
                     checkBox.isChecked = true
