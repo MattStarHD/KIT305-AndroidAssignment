@@ -8,6 +8,8 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <include layout="@layout/header_bar"/>
+
     <EditText
         android:id="@+id/txtWindowName"
         android:layout_width="match_parent"
@@ -36,17 +38,6 @@
         android:hint="Notes"
         android:inputType="text" />
 
-    <Button
-        android:id="@+id/btnSaveWindow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save Window" />
-
-    <Button
-        android:id="@+id/btnDeleteWindow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Delete Window" />
 
     <Button
         android:id="@+id/btnSelectProduct"
@@ -58,5 +49,11 @@
         android:id="@+id/spinnerColour"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnSaveWindow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Window" />
 
 </LinearLayout>

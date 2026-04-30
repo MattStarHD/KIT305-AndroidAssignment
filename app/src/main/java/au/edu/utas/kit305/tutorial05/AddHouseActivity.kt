@@ -11,6 +11,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.app.AlertDialog
 import android.view.View
 import android.widget.Toast
+import android.widget.TextView
+import android.widget.ImageView
 class AddHouseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,11 +27,22 @@ class AddHouseActivity : AppCompatActivity() {
         val btnCreate = findViewById<Button>(R.id.btnCreateHouse)
         val houseId = intent.getStringExtra("houseId")
         val editMode = intent.getBooleanExtra("editMode", false)
+        val title = findViewById<TextView>(R.id.lblHeaderTitle)
+        val btnDelete = findViewById<ImageView>(R.id.btnDelete)
 
         if (editMode) {
             btnCreate.text = "Save House"
         } else {
             btnCreate.text = "Create"
+        }
+
+        val isEdit = intent.getBooleanExtra("editMode", false)
+
+        findViewById<TextView>(R.id.lblHeaderTitle).text =
+            if (isEdit) "Edit House" else "Add House"
+
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
         }
 
         val btnDeleteHouse = findViewById<Button>(R.id.btnDeleteHouse)
@@ -38,6 +51,12 @@ class AddHouseActivity : AppCompatActivity() {
             btnDeleteHouse.visibility = View.VISIBLE
         } else {
             btnDeleteHouse.visibility = View.GONE
+        }
+
+        findViewById<TextView>(R.id.lblHeaderTitle).text = "Create House"
+
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
         }
 
         if (editMode && houseId != null) {

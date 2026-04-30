@@ -8,6 +8,8 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <include layout="@layout/header_bar"/>
+
     <EditText
         android:id="@+id/txtRoomName"
         android:layout_width="match_parent"

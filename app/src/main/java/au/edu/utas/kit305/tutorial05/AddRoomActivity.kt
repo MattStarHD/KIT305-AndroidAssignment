@@ -11,6 +11,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.app.AlertDialog
 import android.view.View
 import android.widget.Toast
+import android.widget.TextView
+import android.widget.ImageView
 
 class AddRoomActivity : AppCompatActivity() {
 
@@ -28,11 +30,27 @@ class AddRoomActivity : AppCompatActivity() {
         val roomId = intent.getStringExtra("roomId")
         val editMode = intent.getBooleanExtra("editMode", false)
         val btnDeleteRoom = findViewById<Button>(R.id.btnDeleteRoom)
+        val title = findViewById<TextView>(R.id.lblHeaderTitle)
+        val back = findViewById<ImageView>(R.id.btnBack)
+        val isEdit = intent.getBooleanExtra("editMode", false)
+        val btnDelete = findViewById<ImageView>(R.id.btnDelete)
 
-        if (editMode) {
-            btnDeleteRoom.visibility = View.VISIBLE
-        } else {
-            btnDeleteRoom.visibility = View.GONE
+        title.text = if (isEdit) "Edit Floor" else "Add Floor"
+
+// Show trash icon only when editing
+        if (isEdit) {
+            btnDelete.visibility = View.VISIBLE
+        }
+
+        back.setOnClickListener {
+            finish()
+        }
+
+        findViewById<TextView>(R.id.lblHeaderTitle).text =
+            if (isEdit) "Edit Room" else "Add Room"
+
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
         }
 
         btnDeleteRoom.setOnClickListener {

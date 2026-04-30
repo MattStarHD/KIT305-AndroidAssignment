@@ -11,6 +11,8 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.app.AlertDialog
 import android.view.View
+import android.widget.TextView
+import android.widget.ImageView
 
 class AddWindowActivity : AppCompatActivity() {
 
@@ -61,31 +63,44 @@ class AddWindowActivity : AppCompatActivity() {
         val txtNotes = findViewById<EditText>(R.id.txtNotes)
         val btnSaveWindow = findViewById<Button>(R.id.btnSaveWindow)
         val btnSelectProduct = findViewById<Button>(R.id.btnSelectProduct)
-
+        val isEdit = intent.getBooleanExtra("editMode", false)
         val db = FirebaseFirestore.getInstance()
         val windowId = intent.getStringExtra("windowId")
         val editMode = intent.getBooleanExtra("editMode", false)
-        val btnDeleteWindow = findViewById<Button>(R.id.btnDeleteWindow)
+        val title = findViewById<TextView>(R.id.lblHeaderTitle)
+        val btnDelete = findViewById<ImageView>(R.id.btnDelete)
 
-        if (editMode) {
-            btnDeleteWindow.visibility = View.VISIBLE
-        } else {
-            btnDeleteWindow.visibility = View.GONE
+
+// Show trash icon only when editing
+        if (isEdit) {
+            btnDelete.visibility = View.VISIBLE
         }
 
-        btnDeleteWindow.setOnClickListener {
+        findViewById<TextView>(R.id.lblHeaderTitle).text =
+            if (isEdit) "Edit Window" else "Add Window"
+
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
+
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
+        btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete Window?")
-                .setMessage("Are you sure you want to delete this window? This cannot be undone.")
+                .setMessage("Are you sure you want to delete this window?")
                 .setPositiveButton("Delete") { _, _ ->
-                    if (windowId != null) {
-                        db.collection("windows")
-                            .document(windowId)
-                            .delete()
-                            .addOnSuccessListener {
-                                finish()
-                            }
-                    }
+                    val windowId = intent.getStringExtra("windowId") ?: ""
+
+                    db.collection("windows")
+                        .document(windowId)
+                        .delete()
+                        .addOnSuccessListener {
+                            finish()
+                        }
                 }
                 .setNegativeButton("Keep", null)
                 .show()

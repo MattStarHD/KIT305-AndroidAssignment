@@ -145,5 +145,15 @@ class RoomDetailsActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val btnEditRoom = findViewById<ImageView>(R.id.btnEditRoom)
+
+        btnEditRoom.setOnClickListener {
+            val intent = Intent(this, AddRoomActivity::class.java)
+            intent.putExtra("roomId", roomId)
+            intent.putExtra("houseId", houseId)
+            intent.putExtra("editMode", true)
+            startActivity(intent)
+        }
     }
 }

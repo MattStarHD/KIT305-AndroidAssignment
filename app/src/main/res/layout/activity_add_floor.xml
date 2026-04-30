@@ -7,6 +7,8 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <include layout="@layout/header_bar"/>
+
     <EditText
         android:id="@+id/txtWidth"
         android:layout_width="match_parent"
@@ -28,17 +30,6 @@
         android:hint="Notes"
         android:inputType="text" />
 
-    <Button
-        android:id="@+id/btnSaveFloor"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save Floor" />
-
-    <Button
-        android:id="@+id/btnDeleteFloor"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Delete Floor" />
 
     <Button
         android:id="@+id/btnChooseProduct"
@@ -60,5 +51,11 @@
         android:layout_marginTop="4dp"
         android:background="@android:drawable/btn_dropdown"
         android:padding="12dp" />
+
+    <Button
+        android:id="@+id/btnSaveFloor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Floor" />
 
 </LinearLayout>

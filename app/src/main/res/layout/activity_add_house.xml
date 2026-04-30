@@ -9,6 +9,8 @@
     android:padding="16dp"
     tools:context=".AddHouseActivity" >
 
+    <include layout="@layout/header_bar"/>
+
     <EditText
         android:id="@+id/txtHouseName"
         android:layout_width="match_parent"
