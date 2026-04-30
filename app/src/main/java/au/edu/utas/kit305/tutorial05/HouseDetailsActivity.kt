@@ -2,71 +2,60 @@ package au.edu.utas.kit305.tutorial05
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import au.edu.utas.kit305.tutorial05.databinding.ActivityBaseListScreenBinding
+import au.edu.utas.kit305.tutorial05.databinding.MyListItemBinding
 import com.google.firebase.firestore.FirebaseFirestore
-import android.widget.ImageView
-import android.util.Log
 
 class HouseDetailsActivity : AppCompatActivity() {
-    private var roomEditMode = false
-    private lateinit var recycler: RecyclerView
+
+    private lateinit var ui: ActivityBaseListScreenBinding
     private lateinit var db: FirebaseFirestore
+
     private val rooms = mutableListOf<Room>()
     private var houseId = ""
+    private var houseName = "House Name"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        houseId = intent.getStringExtra("houseId") ?: ""
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_base_list_screen)
-        val btnBack = findViewById<ImageView>(R.id.btnBack)
 
-        val btnEdit = findViewById<ImageView>(R.id.btnEdit)
+        ui = ActivityBaseListScreenBinding.inflate(layoutInflater)
+        setContentView(ui.root)
 
-        btnBack.setOnClickListener {
+        houseId = intent.getStringExtra("houseId") ?: ""
+        houseName = intent.getStringExtra("houseName") ?: "House Name"
+
+        db = FirebaseFirestore.getInstance()
+
+        ui.lblListTitle.text = houseName
+        ui.btnListAdd.text = "Add Room"
+        ui.btnQuote.text = "Quote"
+
+        ui.btnBack.setOnClickListener {
             finish()
         }
 
-        val houseName = intent.getStringExtra("houseName") ?: "House Name"
+        ui.btnEdit.setOnClickListener {
+            val intent = Intent(this, EditHouseActivity::class.java)
+            intent.putExtra("houseId", houseId)
+            intent.putExtra("editMode", true)
+            startActivity(intent)
+        }
 
-        val title = findViewById<TextView>(R.id.lblListTitle)
-        val btnAdd = findViewById<Button>(R.id.btnListAdd)
-        val btnQuote = findViewById<Button>(R.id.btnQuote)
-        recycler = findViewById(R.id.recyclerList)
-
-            btnEdit.setOnClickListener {
-                val intent = Intent(this, AddHouseActivity::class.java)
-                intent.putExtra("houseId", houseId)
-                intent.putExtra("editMode", true)
-                startActivity(intent)
-            }
-
-        title.text = houseName
-        btnAdd.text = "Add Room"
-        btnQuote.text = "Quote"
-
-        btnQuote.setOnClickListener {
+        ui.btnQuote.setOnClickListener {
             val intent = Intent(this, QuoteActivity::class.java)
             intent.putExtra("houseId", houseId)
             intent.putExtra("houseName", houseName)
             startActivity(intent)
         }
 
-        db = FirebaseFirestore.getInstance()
+        ui.recyclerList.layoutManager = LinearLayoutManager(this)
+        ui.recyclerList.adapter = RoomTextAdapter(rooms)
 
-        recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = RoomTextAdapter(rooms, houseName)
-
-        loadRooms()
-
-        btnAdd.setOnClickListener {
+        ui.btnListAdd.setOnClickListener {
             val intent = Intent(this, AddRoomActivity::class.java)
             intent.putExtra("houseId", houseId)
             startActivity(intent)
@@ -98,26 +87,19 @@ class HouseDetailsActivity : AppCompatActivity() {
                     )
                 }
 
-                recycler.adapter?.notifyDataSetChanged()
+                ui.recyclerList.adapter?.notifyDataSetChanged()
             }
     }
 
     inner class RoomTextAdapter(
-        private val rooms: List<Room>,
-        private val houseName: String
-    ) :
-        RecyclerView.Adapter<RoomTextAdapter.RoomHolder>() {
+        private val rooms: List<Room>
+    ) : RecyclerView.Adapter<RoomTextAdapter.RoomHolder>() {
 
-        inner class RoomHolder(val view: android.view.View) : RecyclerView.ViewHolder(view) {
-            val txtName: TextView = view.findViewById(R.id.txtName)
-            val txtArrow: TextView = view.findViewById(R.id.txtArrow)
-        }
+        inner class RoomHolder(val ui: MyListItemBinding) : RecyclerView.ViewHolder(ui.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.my_list_item, parent, false)
-
-            return RoomHolder(view)
+            val ui = MyListItemBinding.inflate(layoutInflater, parent, false)
+            return RoomHolder(ui)
         }
 
         override fun getItemCount(): Int {
@@ -127,72 +109,17 @@ class HouseDetailsActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: RoomHolder, position: Int) {
             val room = rooms[position]
 
-            holder.txtName.text = room.roomName
+            holder.ui.txtName.text = room.roomName
+            holder.ui.txtArrow.text = ">"
 
-            if (roomEditMode) {
-                holder.txtArrow.text = "Edit"
-            } else {
-                holder.txtArrow.text = ">"
+            holder.ui.root.setOnClickListener {
+                val intent = Intent(this@HouseDetailsActivity, RoomDetailsActivity::class.java)
+                intent.putExtra("roomId", room.id)
+                intent.putExtra("roomName", room.roomName)
+                intent.putExtra("houseId", room.houseId)
+                intent.putExtra("houseName", houseName)
+                startActivity(intent)
             }
-
-            holder.view.setOnClickListener {
-                if (roomEditMode) {
-                    val intent = Intent(holder.view.context, AddRoomActivity::class.java)
-                    intent.putExtra("roomId", room.id)
-                    intent.putExtra("houseId", room.houseId)
-                    intent.putExtra("editMode", true)
-                    holder.view.context.startActivity(intent)
-                } else {
-                    val intent = Intent(holder.view.context, RoomDetailsActivity::class.java)
-                    intent.putExtra("roomId", room.id)
-                    intent.putExtra("roomName", room.roomName)
-                    intent.putExtra("houseId", room.houseId)
-                    intent.putExtra("houseName", houseName)
-                    holder.view.context.startActivity(intent)
-                }
-            }
-        }
-    }
-    }
-
-
-
-
-
-
-
-
-
-
-
-/*package au.edu.utas.kit305.tutorial05
-
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import android.widget.TextView
-
-class HouseDetailsActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_base_list_screen)
-
-        val houseName = intent.getStringExtra("houseName") ?: ""
-        val address = intent.getStringExtra("address") ?: ""
-        val customerName = intent.getStringExtra("customerName") ?: ""
-
-        findViewById<TextView>(R.id.lblHouseName).text = houseName
-        findViewById<TextView>(R.id.lblAddress).text = address
-        findViewById<TextView>(R.id.lblCustomerName).text = customerName
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
         }
     }
 }
-*/

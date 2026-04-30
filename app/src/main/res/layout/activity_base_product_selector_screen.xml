@@ -9,7 +9,9 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <include layout="@layout/header_bar" />
+    <include
+        android:id="@+id/headerBar"
+        layout="@layout/header_bar" />
 
 
 

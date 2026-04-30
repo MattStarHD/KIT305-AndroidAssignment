@@ -2,44 +2,42 @@ package au.edu.utas.kit305.tutorial05
 
 import android.os.Bundle
 import android.widget.CheckBox
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import au.edu.utas.kit305.tutorial05.databinding.ActivityQuoteBinding
 import com.google.firebase.firestore.FirebaseFirestore
 
 class QuoteActivity : AppCompatActivity() {
 
+    private lateinit var ui: ActivityQuoteBinding
     private lateinit var db: FirebaseFirestore
-    private lateinit var quoteContainer: LinearLayout
-    private lateinit var lblQuoteTotal: TextView
 
     private val selectedPrices = mutableMapOf<String, Double>()
     private val roomItems = mutableMapOf<String, MutableList<String>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_quote)
+
+        ui = ActivityQuoteBinding.inflate(layoutInflater)
+        setContentView(ui.root)
 
         db = FirebaseFirestore.getInstance()
 
-        quoteContainer = findViewById(R.id.quoteContainer)
-        lblQuoteTotal = findViewById(R.id.lblQuoteTotal)
-
-        findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+        ui.btnBack.setOnClickListener {
             finish()
         }
 
         val houseId = intent.getStringExtra("houseId") ?: ""
         val houseName = intent.getStringExtra("houseName") ?: "House Quote"
 
-        findViewById<TextView>(R.id.lblQuoteTitle).text = "Quote for $houseName"
+        ui.lblQuoteTitle.text = "Quote for $houseName"
 
         loadQuote(houseId)
     }
 
     private fun loadQuote(houseId: String) {
-        quoteContainer.removeAllViews()
+        ui.quoteContainer.removeAllViews()
         selectedPrices.clear()
         roomItems.clear()
 
@@ -96,7 +94,7 @@ class QuoteActivity : AppCompatActivity() {
                     windowContainer.orientation = LinearLayout.VERTICAL
                     roomBox.addView(windowContainer)
 
-                    quoteContainer.addView(roomBox)
+                    ui.quoteContainer.addView(roomBox)
 
                     roomCheckBox.setOnCheckedChangeListener { _, isChecked ->
                         val keys = roomItems[roomId] ?: mutableListOf()
@@ -234,6 +232,6 @@ class QuoteActivity : AppCompatActivity() {
 
     private fun updateTotal() {
         val total = selectedPrices.values.sum()
-        lblQuoteTotal.text = "Final Quote Total: $${"%.2f".format(total)}"
+        ui.lblQuoteTotal.text = "Final Quote Total: $${"%.2f".format(total)}"
     }
 }

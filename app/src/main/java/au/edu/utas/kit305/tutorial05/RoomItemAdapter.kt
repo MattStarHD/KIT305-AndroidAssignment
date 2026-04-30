@@ -1,35 +1,20 @@
 package au.edu.utas.kit305.tutorial05
 
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import android.widget.Button
+import au.edu.utas.kit305.tutorial05.databinding.RoomItemBinding
 
 class RoomItemAdapter(
     private val items: List<RoomItem>,
     private val onEdit: (RoomItem) -> Unit
-) :
-    RecyclerView.Adapter<RoomItemAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RoomItemAdapter.ViewHolder>() {
 
-    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val txtName: TextView = view.findViewById(R.id.txtName)
-        val txtDetails: TextView = view.findViewById(R.id.txtDetails)
-        val txtPrice: TextView = view.findViewById(R.id.txtPrice)
-
-        val btnEdit: Button = view.findViewById(R.id.btnEdit)
-    }
+    inner class ViewHolder(val ui: RoomItemBinding) : RecyclerView.ViewHolder(ui.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.room_item, parent, false)
-        return ViewHolder(view)
+        val ui = RoomItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(ui)
     }
 
     override fun getItemCount() = items.size
@@ -37,10 +22,11 @@ class RoomItemAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 
-        holder.txtName.text = item.name
-        holder.txtDetails.text = item.details
-        holder.txtPrice.text = "$${"%.2f".format(item.price)}"
-        holder.btnEdit.setOnClickListener {
+        holder.ui.txtName.text = item.name
+        holder.ui.txtDetails.text = item.details
+        holder.ui.txtPrice.text = "$${"%.2f".format(item.price)}"
+
+        holder.ui.btnEdit.setOnClickListener {
             onEdit(item)
         }
     }

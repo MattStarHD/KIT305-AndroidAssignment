@@ -24,8 +24,6 @@ class MainActivity : AppCompatActivity()
         ui = ActivityMainBinding.inflate(layoutInflater)
         setContentView(ui.root)
 
-        val db = FirebaseFirestore.getInstance()
-
         ui.lblMovieCount.text = "${items.size} Houses"
         ui.myList.adapter = HouseAdapter(houses = items)
         ui.myList.layoutManager = LinearLayoutManager(this)
@@ -35,29 +33,6 @@ class MainActivity : AppCompatActivity()
             startActivity(intent)
         }
 
-        db.collection("houses")
-            .get()
-            .addOnSuccessListener { result ->
-                items.clear()
-
-                for (document in result) { //------------------ai--------------------
-                    val houseName = document.getString("houseName") ?: ""
-                    val address = document.getString("address") ?: ""
-                    val customerName = document.getString("customerName") ?: ""
-
-                    items.add(
-                        House(
-                            id = document.id,
-                            houseName = houseName,
-                            address = address,
-                            customerName = customerName
-                        )
-                    )
-                }
-
-                ui.lblMovieCount.text = "${items.size} Houses"
-                ui.myList.adapter?.notifyDataSetChanged()
-            }
     }
 
     private fun loadHouses() {

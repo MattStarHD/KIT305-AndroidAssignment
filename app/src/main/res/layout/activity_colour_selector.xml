@@ -5,7 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/header_bar" />
+    <include
+        android:id="@+id/headerBar"
+        layout="@layout/header_bar" />
 
     <LinearLayout
         android:id="@+id/colourContainer"
