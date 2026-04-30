@@ -1,64 +1,38 @@
 package au.edu.utas.kit305.tutorial05
 
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import android.widget.Button
-import android.widget.EditText
-import com.google.firebase.firestore.FirebaseFirestore
 import android.app.AlertDialog
+import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import android.widget.TextView
-import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+import au.edu.utas.kit305.tutorial05.databinding.ActivityAddRoomBinding
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AddRoomActivity : AppCompatActivity() {
 
+    private lateinit var ui: ActivityAddRoomBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_room)
 
+        ui = ActivityAddRoomBinding.inflate(layoutInflater)
+        setContentView(ui.root)
 
+        val db = FirebaseFirestore.getInstance()
 
         val houseId = intent.getStringExtra("houseId") ?: ""
-
-        val txtRoomName = findViewById<EditText>(R.id.txtRoomName)
-        val txtRoomWidth = findViewById<EditText>(R.id.txtRoomWidth)
-        val txtRoomDepth = findViewById<EditText>(R.id.txtRoomDepth)
-        val btnSaveRoom = findViewById<Button>(R.id.btnSaveRoom)
-        val db = FirebaseFirestore.getInstance()
         val roomId = intent.getStringExtra("roomId")
-        val editMode = intent.getBooleanExtra("editMode", false)
-        val btnDeleteRoom = findViewById<Button>(R.id.btnDeleteRoom)
-        val title = findViewById<TextView>(R.id.lblHeaderTitle)
-        val back = findViewById<ImageView>(R.id.btnBack)
         val isEdit = intent.getBooleanExtra("editMode", false)
-        val btnDelete = findViewById<ImageView>(R.id.btnDelete)
 
+        ui.headerBar.lblHeaderTitle.text = if (isEdit) "Edit Room" else "Add Room"
 
-        findViewById<TextView>(R.id.lblHeaderTitle).text =
-            if (isEdit) "Edit Room" else "Add Room"
-
-        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+        ui.headerBar.btnBack.setOnClickListener {
             finish()
         }
 
-        btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
+        ui.headerBar.btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
 
-        title.text = if (isEdit) "Edit Room" else "Add Room"
-
-// Show trash icon only when editing
-        if (isEdit) {
-            btnDelete.visibility = View.VISIBLE
-        }
-
-        back.setOnClickListener {
-            finish()
-        }
-
-        btnDeleteRoom.setOnClickListener {
+        ui.headerBar.btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete Room?")
                 .setMessage("Are you sure you want to delete this room? This cannot be undone.")
@@ -76,34 +50,34 @@ class AddRoomActivity : AppCompatActivity() {
                 .show()
         }
 
-        if (editMode && roomId != null) {
+        if (isEdit && roomId != null) {
             db.collection("rooms")
                 .document(roomId)
                 .get()
                 .addOnSuccessListener { document ->
-                    txtRoomName.setText(document.getString("roomName") ?: "")
-                    txtRoomWidth.setText((document.getDouble("width") ?: 0.0).toString())
-                    txtRoomDepth.setText((document.getDouble("depth") ?: 0.0).toString())
+                    ui.txtRoomName.setText(document.getString("roomName") ?: "")
+                    ui.txtRoomWidth.setText((document.getDouble("width") ?: 0.0).toString())
+                    ui.txtRoomDepth.setText((document.getDouble("depth") ?: 0.0).toString())
                 }
         }
 
-        btnSaveRoom.setOnClickListener {
-            val roomName = txtRoomName.text.toString()
-            val widthText = txtRoomWidth.text.toString()
-            val depthText = txtRoomDepth.text.toString()
+        ui.btnSaveRoom.setOnClickListener {
+            val roomName = ui.txtRoomName.text.toString()
+            val widthText = ui.txtRoomWidth.text.toString()
+            val depthText = ui.txtRoomDepth.text.toString()
 
             if (!isValidText(roomName)) {
-                txtRoomName.error = "Required"
+                ui.txtRoomName.error = "Required"
                 return@setOnClickListener
             }
 
             if (!isValidDouble(widthText)) {
-                txtRoomWidth.error = "Enter a valid width"
+                ui.txtRoomWidth.error = "Enter a valid width"
                 return@setOnClickListener
             }
 
             if (!isValidDouble(depthText)) {
-                txtRoomDepth.error = "Enter a valid depth"
+                ui.txtRoomDepth.error = "Enter a valid depth"
                 return@setOnClickListener
             }
 
@@ -118,13 +92,16 @@ class AddRoomActivity : AppCompatActivity() {
                 "notes" to ""
             )
 
-            if (editMode && roomId != null) {
+            if (isEdit && roomId != null) {
                 db.collection("rooms")
                     .document(roomId)
                     .set(room)
                     .addOnSuccessListener {
                         Toast.makeText(this, "Room updated", Toast.LENGTH_SHORT).show()
                         finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                     }
             } else {
                 db.collection("rooms")
@@ -133,10 +110,10 @@ class AddRoomActivity : AppCompatActivity() {
                         Toast.makeText(this, "Room saved", Toast.LENGTH_SHORT).show()
                         finish()
                     }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
             }
-                .addOnFailureListener { e ->
-                    android.widget.Toast.makeText(this, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
-                }
         }
     }
 

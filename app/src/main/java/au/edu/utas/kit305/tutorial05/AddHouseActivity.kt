@@ -1,76 +1,39 @@
 package au.edu.utas.kit305.tutorial05
 
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import android.widget.Button
-import android.widget.EditText
-import com.google.firebase.firestore.FirebaseFirestore
 import android.app.AlertDialog
+import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import android.widget.TextView
-import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+import au.edu.utas.kit305.tutorial05.databinding.ActivityAddHouseBinding
+import com.google.firebase.firestore.FirebaseFirestore
+
 class AddHouseActivity : AppCompatActivity() {
+
+    private lateinit var ui: ActivityAddHouseBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_add_house)
 
-        val db = FirebaseFirestore.getInstance() //----------------ai-----------------
+        ui = ActivityAddHouseBinding.inflate(layoutInflater)
+        setContentView(ui.root)
 
-        val txtHouseName = findViewById<EditText>(R.id.txtHouseName)
-        val txtAddress = findViewById<EditText>(R.id.txtAddress)
-        val txtCustomerName = findViewById<EditText>(R.id.txtCustomerName)
-        val btnCreate = findViewById<Button>(R.id.btnCreateHouse)
+        val db = FirebaseFirestore.getInstance()
+
         val houseId = intent.getStringExtra("houseId")
-        val editMode = intent.getBooleanExtra("editMode", false)
-        val title = findViewById<TextView>(R.id.lblHeaderTitle)
-        val btnDelete = findViewById<ImageView>(R.id.btnDelete)
-
-        if (editMode) {
-            btnCreate.text = "Save House"
-        } else {
-            btnCreate.text = "Create"
-        }
-
         val isEdit = intent.getBooleanExtra("editMode", false)
 
-        findViewById<TextView>(R.id.lblHeaderTitle).text =
-            if (isEdit) "Edit House" else "Add House"
+        ui.btnCreateHouse.text = if (isEdit) "Save House" else "Create"
 
-        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+        ui.headerBar.lblHeaderTitle.text = if (isEdit) "Edit House" else "Add House"
+
+        ui.headerBar.btnBack.setOnClickListener {
             finish()
         }
 
-        val btnDeleteHouse = findViewById<Button>(R.id.btnDeleteHouse)
+        ui.headerBar.btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
 
-        if (editMode) {
-            btnDeleteHouse.visibility = View.VISIBLE
-        } else {
-            btnDeleteHouse.visibility = View.GONE
-        }
-
-        findViewById<TextView>(R.id.lblHeaderTitle).text = "Create House"
-
-        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
-            finish()
-        }
-
-        if (editMode && houseId != null) {
-            db.collection("houses")
-                .document(houseId)
-                .get()
-                .addOnSuccessListener { document ->
-                    txtHouseName.setText(document.getString("houseName") ?: "")
-                    txtAddress.setText(document.getString("address") ?: "")
-                    txtCustomerName.setText(document.getString("customerName") ?: "")
-                }
-        }
-
-        btnDeleteHouse.setOnClickListener {
+        ui.headerBar.btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete House?")
                 .setMessage("Are you sure you want to delete this house? This cannot be undone.")
@@ -89,31 +52,38 @@ class AddHouseActivity : AppCompatActivity() {
                 .show()
         }
 
+        if (isEdit && houseId != null) {
+            db.collection("houses")
+                .document(houseId)
+                .get()
+                .addOnSuccessListener { document ->
+                    ui.txtHouseName.setText(document.getString("houseName") ?: "")
+                    ui.txtAddress.setText(document.getString("address") ?: "")
+                    ui.txtCustomerName.setText(document.getString("customerName") ?: "")
+                }
+        }
 
-
-        btnCreate.setOnClickListener {
-            val houseName = txtHouseName.text.toString()
-            val address = txtAddress.text.toString()
-            val customerName = txtCustomerName.text.toString()
+        ui.btnCreateHouse.setOnClickListener {
+            val houseName = ui.txtHouseName.text.toString()
+            val address = ui.txtAddress.text.toString()
+            val customerName = ui.txtCustomerName.text.toString()
 
             if (!isValidText(houseName)) {
-                txtHouseName.error = "Required"
+                ui.txtHouseName.error = "Required"
                 return@setOnClickListener
             }
 
             if (!isValidText(address)) {
-                txtAddress.error = "Required"
+                ui.txtAddress.error = "Required"
                 return@setOnClickListener
             }
 
             if (!isValidText(customerName)) {
-                txtCustomerName.error = "Required"
+                ui.txtCustomerName.error = "Required"
                 return@setOnClickListener
             }
 
             val house = hashMapOf(
-
-
                 "houseName" to houseName.trim(),
                 "address" to address.trim(),
                 "customerName" to customerName.trim(),
@@ -121,13 +91,16 @@ class AddHouseActivity : AppCompatActivity() {
                 "status" to "Draft"
             )
 
-            if (editMode && houseId != null) {
+            if (isEdit && houseId != null) {
                 db.collection("houses")
                     .document(houseId)
                     .set(house)
                     .addOnSuccessListener {
                         Toast.makeText(this, "House updated", Toast.LENGTH_SHORT).show()
                         finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                     }
             } else {
                 db.collection("houses")
@@ -136,18 +109,14 @@ class AddHouseActivity : AppCompatActivity() {
                         Toast.makeText(this, "House created", Toast.LENGTH_SHORT).show()
                         finish()
                     }
-            }                               //^^^^^^^^^^^^^^ai^^^^^^^^^^^^^
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+            }
         }
     }
 
-        private fun isValidText(input: String): Boolean {
-            return input.trim().isNotEmpty()
-        }
-
+    private fun isValidText(input: String): Boolean {
+        return input.trim().isNotEmpty()
+    }
 }
