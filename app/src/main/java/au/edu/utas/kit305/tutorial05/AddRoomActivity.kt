@@ -20,6 +20,8 @@ class AddRoomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_room)
 
+
+
         val houseId = intent.getStringExtra("houseId") ?: ""
 
         val txtRoomName = findViewById<EditText>(R.id.txtRoomName)
@@ -34,6 +36,16 @@ class AddRoomActivity : AppCompatActivity() {
         val back = findViewById<ImageView>(R.id.btnBack)
         val isEdit = intent.getBooleanExtra("editMode", false)
         val btnDelete = findViewById<ImageView>(R.id.btnDelete)
+
+
+        findViewById<TextView>(R.id.lblHeaderTitle).text =
+            if (isEdit) "Edit Room" else "Add Room"
+
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
+
+        btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
 
         title.text = if (isEdit) "Edit Floor" else "Add Floor"
 

@@ -1,54 +1,51 @@
 package au.edu.utas.kit305.tutorial05
 
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-
-import android.widget.EditText
-import android.widget.Button
-import com.google.firebase.firestore.FirebaseFirestore
-import android.content.Intent
-import androidx.activity.result.contract.ActivityResultContracts
-import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
+import android.os.Bundle
 import android.view.View
-import android.widget.TextView
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AddFloorActivity : AppCompatActivity() {
 
     private var selectedProductId = ""
     private var selectedProductName = ""
     private var selectedProductPrice = 0.0
+    private var selectedColour = ""
+    private var availableColours = arrayListOf<String>()
 
     private val productLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == RESULT_OK) {
+        if (result.resultCode == Activity.RESULT_OK) {
             selectedProductId = result.data?.getStringExtra("productId") ?: ""
             selectedProductName = result.data?.getStringExtra("productName") ?: ""
             selectedProductPrice = result.data?.getDoubleExtra("productPrice", 0.0) ?: 0.0
+            availableColours = result.data?.getStringArrayListExtra("productVariants") ?: arrayListOf()
 
-            val variants =
-                result.data?.getStringArrayListExtra("productVariants") ?: arrayListOf()
+            selectedColour = ""
 
             findViewById<Button>(R.id.btnChooseProduct).text = selectedProductName
+            findViewById<Button>(R.id.btnChooseColour).text = "Choose Colour"
+            val intent = Intent(this, ColourSelectorActivity::class.java)
+            intent.putStringArrayListExtra("colours", availableColours)
+            colourLauncher.launch(intent)
+        }
+    }
 
-            val spinnerColour = findViewById<Spinner>(R.id.spinnerColour)
-
-            val adapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_spinner_item,
-                variants
-            )
-
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerColour.adapter = adapter
+    private val colourLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            selectedColour = result.data?.getStringExtra("selectedColour") ?: ""
+            findViewById<Button>(R.id.btnChooseColour).text = selectedColour
         }
     }
 
@@ -56,22 +53,20 @@ class AddFloorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_floor)
 
+        val db = FirebaseFirestore.getInstance()
+
         val roomId = intent.getStringExtra("roomId") ?: ""
-        Log.d("ROOM_DEBUG", "Received roomId: $roomId")
+        val floorId = intent.getStringExtra("floorId")
+        val isEdit = intent.getBooleanExtra("editMode", false)
 
         val txtWidth = findViewById<EditText>(R.id.txtWidth)
         val txtDepth = findViewById<EditText>(R.id.txtDepth)
         val txtNotes = findViewById<EditText>(R.id.txtNotes)
+
         val btnSaveFloor = findViewById<Button>(R.id.btnSaveFloor)
         val btnChooseProduct = findViewById<Button>(R.id.btnChooseProduct)
-        val spinnerColour = findViewById<Spinner>(R.id.spinnerColour)
-        val db = FirebaseFirestore.getInstance()
-        val floorId = intent.getStringExtra("floorId")
-        val editMode = intent.getBooleanExtra("editMode", false)
-        val isEdit = intent.getBooleanExtra("editMode", false)
-        val title = findViewById<TextView>(R.id.lblHeaderTitle)
+        val btnChooseColour = findViewById<Button>(R.id.btnChooseColour)
         val btnDelete = findViewById<ImageView>(R.id.btnDelete)
-
 
         findViewById<TextView>(R.id.lblHeaderTitle).text =
             if (isEdit) "Edit Floor" else "Add Floor"
@@ -80,15 +75,12 @@ class AddFloorActivity : AppCompatActivity() {
             finish()
         }
 
-        if (isEdit) {
-            btnDelete.visibility = View.VISIBLE
-        }
-
+        btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
 
         btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete Floor?")
-                .setMessage("Are you sure you want to delete this floor? This cannot be undone.")
+                .setMessage("Are you sure you want to delete this floor?")
                 .setPositiveButton("Delete") { _, _ ->
                     if (floorId != null) {
                         db.collection("floors")
@@ -103,25 +95,25 @@ class AddFloorActivity : AppCompatActivity() {
                 .show()
         }
 
-        if (editMode && floorId != null) {
+        if (isEdit && floorId != null) {
             db.collection("floors")
                 .document(floorId)
                 .get()
                 .addOnSuccessListener { document ->
-
-                    val width = document.getDouble("width") ?: 0.0
-                    val depth = document.getDouble("depth") ?: 0.0
-                    val notes = document.getString("notes") ?: ""
-
-                    txtWidth.setText(width.toString())
-                    txtDepth.setText(depth.toString())
-                    txtNotes.setText(notes)
+                    txtWidth.setText((document.getDouble("width") ?: 0.0).toString())
+                    txtDepth.setText((document.getDouble("depth") ?: 0.0).toString())
+                    txtNotes.setText(document.getString("notes") ?: "")
 
                     selectedProductId = document.getString("productId") ?: ""
                     selectedProductName = document.getString("productName") ?: ""
                     selectedProductPrice = document.getDouble("pricePerSquareMeter") ?: 0.0
+                    selectedColour = document.getString("colour") ?: ""
 
-                    btnChooseProduct.text = selectedProductName
+                    btnChooseProduct.text =
+                        if (selectedProductName.isBlank()) "Choose Product" else selectedProductName
+
+                    btnChooseColour.text =
+                        if (selectedColour.isBlank()) "Choose Colour" else selectedColour
                 }
         }
 
@@ -131,11 +123,17 @@ class AddFloorActivity : AppCompatActivity() {
             productLauncher.launch(intent)
         }
 
+        btnChooseColour.setOnClickListener {
+            val intent = Intent(this, ColourSelectorActivity::class.java)
+            intent.putStringArrayListExtra("colours", availableColours)
+            colourLauncher.launch(intent)
+        }
+
         btnSaveFloor.setOnClickListener {
             val width = txtWidth.text.toString().toDoubleOrNull() ?: 0.0
             val depth = txtDepth.text.toString().toDoubleOrNull() ?: 0.0
 
-            val area = (width * depth) / 1_000_000   // mm → m²
+            val area = (width * depth) / 1_000_000
             val totalPrice = area * selectedProductPrice
 
             val floor = hashMapOf(
@@ -148,17 +146,10 @@ class AddFloorActivity : AppCompatActivity() {
                 "area" to area,
                 "totalPrice" to totalPrice,
                 "notes" to txtNotes.text.toString(),
-                "colour" to (spinnerColour.selectedItem?.toString() ?: ""),
+                "colour" to selectedColour
             )
 
-
-            Toast.makeText(
-                this,
-                "editMode=$editMode floorId=$floorId width=$width",
-                Toast.LENGTH_LONG
-            ).show()
-
-            if (editMode && floorId != null) {
+            if (isEdit && floorId != null) {
                 db.collection("floors")
                     .document(floorId)
                     .set(floor)
@@ -173,6 +164,5 @@ class AddFloorActivity : AppCompatActivity() {
                     }
             }
         }
-
     }
 }

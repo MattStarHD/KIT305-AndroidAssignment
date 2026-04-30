@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
+import android.widget.TextView
+import android.widget.ImageView
 
 class ProductSelectorActivity : AppCompatActivity() {
 
@@ -24,6 +26,12 @@ class ProductSelectorActivity : AppCompatActivity() {
 
         val products = allProducts.filter {
             it.type == type
+        }
+
+        findViewById<TextView>(R.id.lblHeaderTitle).text = "Select Product"
+
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+            finish()
         }
 
         recyclerProducts.layoutManager = LinearLayoutManager(this)

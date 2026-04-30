@@ -45,10 +45,11 @@
         android:layout_height="wrap_content"
         android:text="Select Product" />
 
-    <Spinner
-        android:id="@+id/spinnerColour"
+    <Button
+        android:id="@+id/btnChooseColour"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Choose Colour" />
 
     <Button
         android:id="@+id/btnSaveWindow"

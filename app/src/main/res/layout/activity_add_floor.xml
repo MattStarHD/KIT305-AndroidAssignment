@@ -44,13 +44,11 @@
         android:textSize="16sp"
         android:layout_marginTop="12dp" />
 
-    <Spinner
-        android:id="@+id/spinnerColour"
+    <Button
+        android:id="@+id/btnChooseColour"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:layout_marginTop="4dp"
-        android:background="@android:drawable/btn_dropdown"
-        android:padding="12dp" />
+        android:layout_height="wrap_content"
+        android:text="Choose Colour" />
 
     <Button
         android:id="@+id/btnSaveFloor"
