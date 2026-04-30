@@ -5,16 +5,15 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import au.edu.utas.kit305.tutorial05.databinding.ActivityAddWindowBinding
 import com.google.firebase.firestore.FirebaseFirestore
-import android.widget.Toast
 
 class AddWindowActivity : AppCompatActivity() {
+
+    private lateinit var ui: ActivityAddWindowBinding
 
     private var selectedProductId = ""
     private var selectedProductName = ""
@@ -33,8 +32,8 @@ class AddWindowActivity : AppCompatActivity() {
 
             selectedColour = ""
 
-            findViewById<Button>(R.id.btnSelectProduct).text = selectedProductName
-            findViewById<Button>(R.id.btnChooseColour).text = "Choose Colour"
+            ui.btnSelectProduct.text = selectedProductName
+            ui.btnChooseColour.text = "Choose Colour"
 
             val intent = Intent(this, ColourSelectorActivity::class.java)
             intent.putStringArrayListExtra("colours", availableColours)
@@ -47,13 +46,15 @@ class AddWindowActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             selectedColour = result.data?.getStringExtra("selectedColour") ?: ""
-            findViewById<Button>(R.id.btnChooseColour).text = selectedColour
+            ui.btnChooseColour.text = selectedColour
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_window)
+
+        ui = ActivityAddWindowBinding.inflate(layoutInflater)
+        setContentView(ui.root)
 
         val db = FirebaseFirestore.getInstance()
 
@@ -61,26 +62,15 @@ class AddWindowActivity : AppCompatActivity() {
         val windowId = intent.getStringExtra("windowId")
         val isEdit = intent.getBooleanExtra("editMode", false)
 
-        val txtWindowName = findViewById<EditText>(R.id.txtWindowName)
-        val txtWidth = findViewById<EditText>(R.id.txtWidth)
-        val txtHeight = findViewById<EditText>(R.id.txtHeight)
-        val txtNotes = findViewById<EditText>(R.id.txtNotes)
+        ui.headerBar.lblHeaderTitle.text = if (isEdit) "Edit Window" else "Add Window"
 
-        val btnSaveWindow = findViewById<Button>(R.id.btnSaveWindow)
-        val btnSelectProduct = findViewById<Button>(R.id.btnSelectProduct)
-        val btnChooseColour = findViewById<Button>(R.id.btnChooseColour)
-        val btnDelete = findViewById<ImageView>(R.id.btnDelete)
-
-        findViewById<TextView>(R.id.lblHeaderTitle).text =
-            if (isEdit) "Edit Window" else "Add Window"
-
-        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+        ui.headerBar.btnBack.setOnClickListener {
             finish()
         }
 
-        btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
+        ui.headerBar.btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
 
-        btnDelete.setOnClickListener {
+        ui.headerBar.btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete Window?")
                 .setMessage("Are you sure you want to delete this window?")
@@ -103,53 +93,58 @@ class AddWindowActivity : AppCompatActivity() {
                 .document(windowId)
                 .get()
                 .addOnSuccessListener { document ->
-                    txtWindowName.setText(document.getString("windowName") ?: "")
-                    txtWidth.setText((document.getDouble("width") ?: 0.0).toString())
-                    txtHeight.setText((document.getDouble("height") ?: 0.0).toString())
-                    txtNotes.setText(document.getString("notes") ?: "")
+                    ui.txtWindowName.setText(document.getString("windowName") ?: "")
+                    ui.txtWidth.setText((document.getDouble("width") ?: 0.0).toString())
+                    ui.txtHeight.setText((document.getDouble("height") ?: 0.0).toString())
+                    ui.txtNotes.setText(document.getString("notes") ?: "")
 
                     selectedProductId = document.getString("productId") ?: ""
                     selectedProductName = document.getString("productName") ?: ""
                     selectedProductPrice = document.getDouble("pricePerSquareMeter") ?: 0.0
                     selectedColour = document.getString("colour") ?: ""
 
-                    btnSelectProduct.text =
+                    ui.btnSelectProduct.text =
                         if (selectedProductName.isBlank()) "Choose Product" else selectedProductName
 
-                    btnChooseColour.text =
+                    ui.btnChooseColour.text =
                         if (selectedColour.isBlank()) "Choose Colour" else selectedColour
                 }
         }
 
-        btnSelectProduct.setOnClickListener {
+        ui.btnSelectProduct.setOnClickListener {
             val intent = Intent(this, ProductSelectorActivity::class.java)
             intent.putExtra("type", "window")
             productLauncher.launch(intent)
         }
 
-        btnChooseColour.setOnClickListener {
+        ui.btnChooseColour.setOnClickListener {
+            if (availableColours.isEmpty()) {
+                Toast.makeText(this, "Please choose the product again first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val intent = Intent(this, ColourSelectorActivity::class.java)
             intent.putStringArrayListExtra("colours", availableColours)
             colourLauncher.launch(intent)
         }
 
-        btnSaveWindow.setOnClickListener {
-            val windowName = txtWindowName.text.toString()
-            val widthText = txtWidth.text.toString()
-            val heightText = txtHeight.text.toString()
+        ui.btnSaveWindow.setOnClickListener {
+            val windowName = ui.txtWindowName.text.toString()
+            val widthText = ui.txtWidth.text.toString()
+            val heightText = ui.txtHeight.text.toString()
 
             if (!isValidText(windowName)) {
-                txtWindowName.error = "Required"
+                ui.txtWindowName.error = "Required"
                 return@setOnClickListener
             }
 
             if (!isValidDouble(widthText)) {
-                txtWidth.error = "Enter a valid width"
+                ui.txtWidth.error = "Enter a valid width"
                 return@setOnClickListener
             }
 
             if (!isValidDouble(heightText)) {
-                txtHeight.error = "Enter a valid height"
+                ui.txtHeight.error = "Enter a valid height"
                 return@setOnClickListener
             }
 
@@ -179,7 +174,7 @@ class AddWindowActivity : AppCompatActivity() {
                 "height" to height,
                 "area" to area,
                 "totalPrice" to totalPrice,
-                "notes" to txtNotes.text.toString().trim(),
+                "notes" to ui.txtNotes.text.toString().trim(),
                 "colour" to selectedColour
             )
 
@@ -208,5 +203,4 @@ class AddWindowActivity : AppCompatActivity() {
         val number = input.toDoubleOrNull()
         return number != null && number > 0
     }
-
 }

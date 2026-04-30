@@ -5,16 +5,15 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import au.edu.utas.kit305.tutorial05.databinding.ActivityAddFloorBinding
 import com.google.firebase.firestore.FirebaseFirestore
-import android.widget.Toast
 
 class AddFloorActivity : AppCompatActivity() {
+
+    private lateinit var ui: ActivityAddFloorBinding
 
     private var selectedProductId = ""
     private var selectedProductName = ""
@@ -33,8 +32,9 @@ class AddFloorActivity : AppCompatActivity() {
 
             selectedColour = ""
 
-            findViewById<Button>(R.id.btnChooseProduct).text = selectedProductName
-            findViewById<Button>(R.id.btnChooseColour).text = "Choose Colour"
+            ui.btnChooseProduct.text = selectedProductName
+            ui.btnChooseColour.text = "Choose Colour"
+
             val intent = Intent(this, ColourSelectorActivity::class.java)
             intent.putStringArrayListExtra("colours", availableColours)
             colourLauncher.launch(intent)
@@ -46,13 +46,15 @@ class AddFloorActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             selectedColour = result.data?.getStringExtra("selectedColour") ?: ""
-            findViewById<Button>(R.id.btnChooseColour).text = selectedColour
+            ui.btnChooseColour.text = selectedColour
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_floor)
+
+        ui = ActivityAddFloorBinding.inflate(layoutInflater)
+        setContentView(ui.root)
 
         val db = FirebaseFirestore.getInstance()
 
@@ -60,25 +62,15 @@ class AddFloorActivity : AppCompatActivity() {
         val floorId = intent.getStringExtra("floorId")
         val isEdit = intent.getBooleanExtra("editMode", false)
 
-        val txtWidth = findViewById<EditText>(R.id.txtWidth)
-        val txtDepth = findViewById<EditText>(R.id.txtDepth)
-        val txtNotes = findViewById<EditText>(R.id.txtNotes)
+        ui.headerBar.lblHeaderTitle.text = if (isEdit) "Edit Floor" else "Add Floor"
 
-        val btnSaveFloor = findViewById<Button>(R.id.btnSaveFloor)
-        val btnChooseProduct = findViewById<Button>(R.id.btnChooseProduct)
-        val btnChooseColour = findViewById<Button>(R.id.btnChooseColour)
-        val btnDelete = findViewById<ImageView>(R.id.btnDelete)
-
-        findViewById<TextView>(R.id.lblHeaderTitle).text =
-            if (isEdit) "Edit Floor" else "Add Floor"
-
-        findViewById<ImageView>(R.id.btnBack).setOnClickListener {
+        ui.headerBar.btnBack.setOnClickListener {
             finish()
         }
 
-        btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
+        ui.headerBar.btnDelete.visibility = if (isEdit) View.VISIBLE else View.GONE
 
-        btnDelete.setOnClickListener {
+        ui.headerBar.btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Delete Floor?")
                 .setMessage("Are you sure you want to delete this floor?")
@@ -101,46 +93,51 @@ class AddFloorActivity : AppCompatActivity() {
                 .document(floorId)
                 .get()
                 .addOnSuccessListener { document ->
-                    txtWidth.setText((document.getDouble("width") ?: 0.0).toString())
-                    txtDepth.setText((document.getDouble("depth") ?: 0.0).toString())
-                    txtNotes.setText(document.getString("notes") ?: "")
+                    ui.txtWidth.setText((document.getDouble("width") ?: 0.0).toString())
+                    ui.txtDepth.setText((document.getDouble("depth") ?: 0.0).toString())
+                    ui.txtNotes.setText(document.getString("notes") ?: "")
 
                     selectedProductId = document.getString("productId") ?: ""
                     selectedProductName = document.getString("productName") ?: ""
                     selectedProductPrice = document.getDouble("pricePerSquareMeter") ?: 0.0
                     selectedColour = document.getString("colour") ?: ""
 
-                    btnChooseProduct.text =
+                    ui.btnChooseProduct.text =
                         if (selectedProductName.isBlank()) "Choose Product" else selectedProductName
 
-                    btnChooseColour.text =
+                    ui.btnChooseColour.text =
                         if (selectedColour.isBlank()) "Choose Colour" else selectedColour
                 }
         }
 
-        btnChooseProduct.setOnClickListener {
+        ui.btnChooseProduct.setOnClickListener {
             val intent = Intent(this, ProductSelectorActivity::class.java)
             intent.putExtra("type", "floor")
             productLauncher.launch(intent)
         }
 
-        btnChooseColour.setOnClickListener {
+        ui.btnChooseColour.setOnClickListener {
+            if (availableColours.isEmpty()) {
+                Toast.makeText(this, "Please choose the product again first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val intent = Intent(this, ColourSelectorActivity::class.java)
             intent.putStringArrayListExtra("colours", availableColours)
             colourLauncher.launch(intent)
         }
 
-        btnSaveFloor.setOnClickListener {
-            val widthText = txtWidth.text.toString()
-            val depthText = txtDepth.text.toString()
+        ui.btnSaveFloor.setOnClickListener {
+            val widthText = ui.txtWidth.text.toString()
+            val depthText = ui.txtDepth.text.toString()
 
             if (!isValidDouble(widthText)) {
-                txtWidth.error = "Enter a valid width"
+                ui.txtWidth.error = "Enter a valid width"
                 return@setOnClickListener
             }
 
             if (!isValidDouble(depthText)) {
-                txtDepth.error = "Enter a valid depth"
+                ui.txtDepth.error = "Enter a valid depth"
                 return@setOnClickListener
             }
 
@@ -169,7 +166,7 @@ class AddFloorActivity : AppCompatActivity() {
                 "depth" to depth,
                 "area" to area,
                 "totalPrice" to totalPrice,
-                "notes" to txtNotes.text.toString().trim(),
+                "notes" to ui.txtNotes.text.toString().trim(),
                 "colour" to selectedColour
             )
 
@@ -194,5 +191,4 @@ class AddFloorActivity : AppCompatActivity() {
         val number = input.toDoubleOrNull()
         return number != null && number > 0
     }
-
 }
