@@ -38,6 +38,18 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/lblQuoteTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Final Quote Total: $0.00"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -55,15 +67,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
-
-            <TextView
-                android:id="@+id/lblQuoteTotal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Final Quote Total: $0.00"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:paddingTop="24dp" />
 
         </LinearLayout>
     </ScrollView>

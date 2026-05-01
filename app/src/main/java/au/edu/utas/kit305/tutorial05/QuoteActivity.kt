@@ -36,6 +36,7 @@ class QuoteActivity : AppCompatActivity() {
         loadQuote(houseId)
     }
 
+    // load rooms and build the quote screen
     private fun loadQuote(houseId: String) {
         ui.quoteContainer.removeAllViews()
         selectedPrices.clear()
@@ -57,19 +58,20 @@ class QuoteActivity : AppCompatActivity() {
                     roomBox.setPadding(12, 12, 12, 12)
                     roomBox.setBackgroundColor(0xFFE0E0E0.toInt())
 
+                    val labourKey = "labour_$roomId"
+
                     val roomCheckBox = CheckBox(this)
-                    roomCheckBox.text = "$roomName - Labour $200.00"
+                    roomCheckBox.text = "$roomName - Labour $200.0"
                     roomCheckBox.textSize = 18f
                     roomCheckBox.isChecked = true
 
-                    val labourKey = "labour_$roomId"
                     selectedPrices[labourKey] = 200.0
                     roomItems[roomId]?.add(labourKey)
 
                     roomBox.addView(roomCheckBox)
 
                     val roomTotalText = TextView(this)
-                    roomTotalText.text = "Room Total: $200.00"
+                    roomTotalText.text = "Room Total: $200.0"
                     roomTotalText.textSize = 16f
                     roomTotalText.setPadding(8, 4, 8, 12)
                     roomBox.addView(roomTotalText)
@@ -96,6 +98,7 @@ class QuoteActivity : AppCompatActivity() {
 
                     ui.quoteContainer.addView(roomBox)
 
+                    // turn whole room on or off
                     roomCheckBox.setOnCheckedChangeListener { _, isChecked ->
                         val keys = roomItems[roomId] ?: mutableListOf()
 
@@ -135,6 +138,7 @@ class QuoteActivity : AppCompatActivity() {
             }
     }
 
+    // add floor items for a room
     private fun loadFloors(roomId: String, container: LinearLayout, roomTotalText: TextView) {
         db.collection("floors")
             .whereEqualTo("roomId", roomId)
@@ -155,7 +159,7 @@ class QuoteActivity : AppCompatActivity() {
                     val checkBox = CheckBox(this)
                     checkBox.tag = itemKey
                     checkBox.text =
-                        "$productName\n${width}mm x ${depth}mm\nColour: $colour\nPrice: $${"%.2f".format(price)}"
+                        "$productName\n${width}mm x ${depth}mm\nColour: $colour\nPrice: $" + price
                     checkBox.isChecked = true
                     checkBox.setPadding(16, 8, 8, 8)
                     checkBox.setBackgroundColor(0xFFFFFFFF.toInt())
@@ -179,6 +183,7 @@ class QuoteActivity : AppCompatActivity() {
             }
     }
 
+    // add window items for a room
     private fun loadWindows(roomId: String, container: LinearLayout, roomTotalText: TextView) {
         db.collection("windows")
             .whereEqualTo("roomId", roomId)
@@ -200,7 +205,7 @@ class QuoteActivity : AppCompatActivity() {
                     val checkBox = CheckBox(this)
                     checkBox.tag = itemKey
                     checkBox.text =
-                        "$productName\n$windowName\n${width}mm x ${height}mm\nColour: $colour\nPrice: $${"%.2f".format(price)}"
+                        "$productName\n$windowName\n${width}mm x ${height}mm\nColour: $colour\nPrice: $" + price
                     checkBox.isChecked = true
                     checkBox.setPadding(16, 8, 8, 8)
                     checkBox.setBackgroundColor(0xFFFFFFFF.toInt())
@@ -224,14 +229,26 @@ class QuoteActivity : AppCompatActivity() {
             }
     }
 
+    // update one room total
     private fun updateRoomTotal(roomTotalText: TextView, roomId: String) {
         val keys = roomItems[roomId] ?: mutableListOf()
-        val total = keys.sumOf { selectedPrices[it] ?: 0.0 }
-        roomTotalText.text = "Room Total: $${"%.2f".format(total)}"
+        var total = 0.0
+
+        for (key in keys) {
+            total += selectedPrices[key] ?: 0.0
+        }
+
+        roomTotalText.text = "Room Total: $" + String.format("%.2f", total)
     }
 
+    // update total for the whole quote
     private fun updateTotal() {
-        val total = selectedPrices.values.sum()
-        ui.lblQuoteTotal.text = "Final Quote Total: $${"%.2f".format(total)}"
+        var total = 0.0
+
+        for (price in selectedPrices.values) {
+            total += price
+        }
+
+        ui.lblQuoteTotal.text = "Final Quote Total: $" + String.format("%.2f", total)
     }
 }
