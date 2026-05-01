@@ -112,7 +112,7 @@ class RoomDetailsActivity : AppCompatActivity() {
                 }
 
                 ui.recyclerRoomItems.adapter?.notifyDataSetChanged()
-                updateTotal()
+                calculateTotal()
             }
     }
 
@@ -139,12 +139,12 @@ class RoomDetailsActivity : AppCompatActivity() {
                 }
 
                 ui.recyclerWindowItems.adapter?.notifyDataSetChanged()
-                updateTotal()
+                calculateTotal()
             }
     }
 
     // update room total from floors and windows
-    private fun updateTotal() {
+    private fun calculateTotal() {
         var floorTotal = 0.0
         for (item in floorItems) {
             floorTotal += item.price

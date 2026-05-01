@@ -31,7 +31,7 @@ class ProductSelectorActivity : AppCompatActivity() {
         val width = intent.getStringExtra("width") ?: ""
         val depth = intent.getStringExtra("depth") ?: ""
         val notes = intent.getStringExtra("notes") ?: ""
-        val allProducts = parseProducts(jsonString)
+        val allProducts = readProducts(jsonString)
         val products = allProducts.filter { it.type == type }
 
         ui.headerBar.lblHeaderTitle.text = "Select Product"
@@ -65,7 +65,7 @@ class ProductSelectorActivity : AppCompatActivity() {
         }
     }
 
-    private fun parseProducts(jsonString: String): List<Product> {
+    private fun readProducts(jsonString: String): List<Product> {
         val products = mutableListOf<Product>()
         val jsonObject = JSONObject(jsonString)
         val dataArray = jsonObject.getJSONArray("data")

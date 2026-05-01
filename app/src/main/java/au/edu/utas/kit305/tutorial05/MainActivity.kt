@@ -63,20 +63,20 @@ class MainActivity : AppCompatActivity()
             }
     }
 
-    inner class MovieHolder(var ui: MyListItemBinding) : RecyclerView.ViewHolder(ui.root) {}
+    inner class HouseHolder(var ui: MyListItemBinding) : RecyclerView.ViewHolder(ui.root) {}
 
-    inner class HouseAdapter(private val houses: MutableList<House>) : RecyclerView.Adapter<MovieHolder>()
+    inner class HouseAdapter(private val houses: MutableList<House>) : RecyclerView.Adapter<HouseHolder>()
     {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainActivity.MovieHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainActivity.HouseHolder {
             val ui = MyListItemBinding.inflate(layoutInflater, parent, false)
-            return MovieHolder(ui)
+            return HouseHolder(ui)
         }
 
         override fun getItemCount(): Int {
             return houses.size
         }
 
-        override fun onBindViewHolder(holder: MainActivity.MovieHolder, position: Int) {
+        override fun onBindViewHolder(holder: MainActivity.HouseHolder, position: Int) {
             val house = houses[position]
 
             holder.ui.txtName.text = house.houseName
